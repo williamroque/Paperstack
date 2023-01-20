@@ -1,0 +1,25 @@
+#+title: Project Notes
+
+* Goals
+
+- Create UI using framework like Textual (though perhaps more cross-compatible)
+- Pure command-based interface also possible (communication with other programs)
+- Add papers easily (automatically/manually)
+- Submit eventually to PyPI
+- Automatically scrape from a wide variety of databases using a number of different identifiers (DOI, arxiv, Bibcode)
+- Export selection/tag/filter to BibTeX, HTML, and PDF
+- Portable, at least with respect to PDFs
+- Good API/documentation
+- Batch actions on selection
+- Split screen to show information/notes for current item
+- Since papers can be used in many projects, use tags instead of folders
+- Allow notes in papers (markdown with latex) to be edited in any editor
+- Strong search/filter system, including through paper notes
+- TOML configuration file (e.g., editor command, DB path)
+- Create folder with SQLite index and PDF files
+- Add more document types than PDF
+- Detect new files, add to index automatically by prompting
+- Batch import papers
+- Add websites and books to library as well
+
+* Roadmap

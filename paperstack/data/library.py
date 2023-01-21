@@ -100,9 +100,11 @@ class Library:
         record_id : int
         """
 
+        self.get(record_id)
+
         try:
             self.cursor.execute(
-                f'DELETE FROM library WHERE record_id = {record_id}'
+                f'DELETE FROM library WHERE record_id = "{record_id}"'
             )
         except sqlite3.OperationalError:
             self.messenger.send_error(
@@ -160,8 +162,12 @@ class Library:
             self.messenger.send_error(
                 'Bad query. Make sure all columns exist.'
             )
+        except IndexError:
+            self.messenger.send_error(
+                f'Could not find record with ID "{record_id}".'
+            )
 
-        return build_record(result, self.messenger)
+        return build_record(result, self.config, self.messenger)
 
 
     def filter(self, filters):
@@ -200,6 +206,9 @@ class Library:
                 'Bad query. Make sure all columns exist.'
             )
 
-        records = [build_record(row, self.messenger) for row in result]
+        records = [
+            build_record(row, self.config, self.messenger)
+            for row in result
+        ]
 
         return records

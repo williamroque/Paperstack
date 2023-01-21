@@ -48,7 +48,7 @@ def add_record(args):
 
     constructor = record_constructors[args.type]
 
-    record = constructor(parse_dict(args.entries), messenger)
+    record = constructor(parse_dict(args.entries), config, messenger)
 
     library.add(record)
     library.commit()

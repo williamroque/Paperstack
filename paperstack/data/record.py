@@ -1,6 +1,8 @@
 "Module providing Record base data class."
 
 import re
+import os
+import sys
 
 from paperstack.data.constants import COLUMNS
 
@@ -15,6 +17,7 @@ class Record:
     ----------
     record : dict
         The entries of the record.
+    config : paperstack.filesystem.config.Config
     messenger : paperstack.interface.message.Messenger
 
     Attributes
@@ -23,6 +26,7 @@ class Record:
         The type of record.
     record : dict
         The entries of the record.
+    config : paperstack.filesystem.config.Config
     messenger : paperstack.interface.message.Messenger
     requirements : list
         A list of requirement tuples.
@@ -30,8 +34,9 @@ class Record:
 
     RECORD_TYPE = None
 
-    def __init__(self, record, messenger):
+    def __init__(self, record, config, messenger):
         self.record = record
+        self.config = config
         self.messenger = messenger
 
         self.requirements = []
@@ -40,9 +45,16 @@ class Record:
         self.validate()
 
 
-    def __str__(self):
-        record = {}
+    def tabulate_horizontal(self):
+        """Represent the record as a horizontal table.
 
+        Returns
+        -------
+        str
+        """
+
+        record = {}
+        
         for key, value in self.record.items():
             if value is not None:
                 width = max(len(key), len(value))
@@ -61,6 +73,51 @@ class Record:
 
         output = '┌' + '─' * header_width + '┐' + '\n' + output
         output += '\n' + '└' + '─' * header_width + '┘'
+
+        return output
+
+
+    def tabulate_vertical(self):
+        """Represent the record as a vertical table.
+
+        Returns
+        -------
+        str
+        """
+
+        keys = map(str, self.record.keys())
+        values = map(str, self.record.values())
+
+        key_width = max(*map(len, keys))
+        value_width = max(*map(len, values))
+
+        output_lines = []
+        
+        for key, value in self.record.items():
+            if value is not None:
+                key = key.center(key_width, ' ')
+                value = value.center(value_width, ' ')
+
+                output_lines.append(f'│ {key} │ {value} │')
+
+        output = '\n'.join(output_lines)
+
+        header_width = len(output.split('\n', maxsplit=1)[0]) - 2
+
+        output = '┌' + '─' * header_width + '┐' + '\n' + output
+        output += '\n' + '└' + '─' * header_width + '┘'
+
+        return output
+
+
+    def __str__(self):
+        output = self.tabulate_horizontal()
+
+        output_lines = output.split('\n')
+        output_width = max(*map(len, output_lines))
+
+        if output_width > os.get_terminal_size().columns:
+            output = self.tabulate_vertical()
 
         return output
 
@@ -111,6 +168,43 @@ class Record:
         self.requirements.append((field, field_type, required, pattern))
 
 
+    def generate_id(self):
+        """Generate unique record ID (later used as BibTeX key) based on
+        configuration.
+
+        Returns
+        -------
+        str
+        """
+
+        record_type = self.__class__.RECORD_TYPE
+
+        if record_type is None:
+            raise NotImplementedError
+
+        record_id = self.config.get(record_type, 'id-format').strip()
+
+        item_pattern = re.compile(r'(\w+)@(\d+)')
+
+        for field, length in item_pattern.findall(record_id):
+            length = int(length)
+
+            if field not in self.record:
+                self.messenger.send_error(f'Cannot create record ID with non-existent field {field}.')
+
+            if field == 'author':
+                authors = self.record['author'].split(' and ')[:length]
+                sub = '-'.join(authors)
+            else:
+                sub = self.record[field][:length].strip()
+
+            record_id = record_id.replace(f'{field}@{length}', sub)
+
+        record_id = re.sub(r'\s', '-', record_id).lower()
+
+        return record_id
+
+
     def setup(self):
         "Set up requirements according to record type."
 
@@ -145,11 +239,15 @@ class Article(Record):
 
     RECORD_TYPE = 'article'
 
-    def __init__(self, record, messenger):
-        super().__init__(record, messenger)
+    def __init__(self, record, config, messenger):
+        super().__init__(record, config, messenger)
 
 
     def setup(self):
+        if 'record_id' not in self.record or self.record['record_id'] is None:
+            self.record['record_id'] = self.generate_id()
+
+        self.add_requirement('record_id', str, True)
         self.add_requirement('author', str, True)
         self.add_requirement('title', str, True)
         self.add_requirement('journal', str, True)
@@ -171,26 +269,24 @@ record_constructors = {
 }
 
 
-def build_record(record_list, messenger):
+def build_record(record_list, config, messenger):
     """Build `Record` instance from well-ordered record list. This is the
     type of list that would come from a SELECT query.
 
     Parameters
     ----------
     record_list : list
+    config : paperstack.filesystem.config.Config
     messenger : paperstack.interface.message.Messenger
     """
 
-    _, record_type, *record_list = record_list
-    columns = COLUMNS[2:]
-
     record_dict = {
-        columns[i][0] : value.replace('%QUOTE', '"') if value else value
+        COLUMNS[i][0] : value.replace('%QUOTE', '"') if value else value
         for i, value in enumerate(record_list)
     }
 
-    constructor = record_constructors[record_type]
+    constructor = record_constructors[record_list[1]]
 
-    record = constructor(record_dict, messenger)
+    record = constructor(record_dict, config, messenger)
 
     return record

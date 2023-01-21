@@ -1,5 +1,5 @@
 COLUMNS = (
-    ('record_id', 'INTEGER', 'PRIMARY KEY'),
+    ('record_id', 'TEXT', 'PRIMARY KEY'),
     ('record_type', 'TEXT'),
     ('author', 'TEXT'),
     ('organization', 'TEXT'),

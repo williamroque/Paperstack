@@ -9,6 +9,9 @@ from paperstack.filesystem.file import File
 DEFAULT_CONFIG = {
     'paths': {
         'data': '~/Documents/Paperstack/'
+    },
+    'article': {
+        'id-format': 'author#2-title#10-year#4'
     }
 }
 

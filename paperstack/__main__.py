@@ -5,43 +5,50 @@ import argparse
 import sys
 
 from paperstack.data.library import Library
-from paperstack.data.record import Article
+from paperstack.data.record import record_constructors
 from paperstack.filesystem.config import Config
 from paperstack.interface.message import Messenger
+from paperstack.utility import parse_dict
 
 
 def list_records(args):
     config = Config(args.config_path)
-    library = Library(config)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
 
-    library.filter([])
+    records = library.filter([])
+
+    for record in records:
+        messenger.send_neutral(record)
+
+
+def filter_records(args):
+    config = Config(args.config_path)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
+
+    messenger = Messenger(args.ansi)
+
+    filters = list(parse_dict(args.query).items())
+    records = library.filter(filters)
+
+    for record in records:
+        messenger.send_neutral(record)
 
 
 def add_record(args):
     config = Config(args.config_path)
-    library = Library(config)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)
 
-    record_types = {
-        'article': Article
-    }
-
-    if args.type not in record_types:
+    if args.type not in record_constructors:
         messenger.send_error('Invalid record type.')
 
-    constructor = record_types[args.type]
+    constructor = record_constructors[args.type]
 
-    record_dict = {}
-    entries = args.entries.split(';')
-
-    for entry in entries:
-        if entry.strip():
-            key, value = entry.split(':')
-
-            record_dict[key.strip()] = value.strip()
-
-    record = constructor(record_dict)
+    record = constructor(parse_dict(args.entries), config, messenger)
 
     library.add(record)
     library.commit()
@@ -51,7 +58,8 @@ def add_record(args):
 
 def remove_record(args):
     config = Config(args.config_path)
-    library = Library(config)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)
 
@@ -59,6 +67,31 @@ def remove_record(args):
     library.commit()
 
     messenger.send_success('Removed item.')
+
+
+def update_record(args):
+    config = Config(args.config_path)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
+
+    messenger = Messenger(args.ansi)
+
+    library.update(args.id, parse_dict(args.entries))
+    library.commit()
+
+    messenger.send_success('Updated item.')
+
+
+def get_record(args):
+    config = Config(args.config_path)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
+
+    messenger = Messenger(args.ansi)
+
+    record = library.get(args.id)
+
+    messenger.send_neutral(record)
 
 
 def main():
@@ -92,6 +125,30 @@ def main():
     )
     list_parser.set_defaults(func=list_records)
 
+    filter_parser = subparsers.add_parser(
+        'filter',
+        help = 'Filter and list library records.'
+    )
+    filter_parser.set_defaults(func=filter_records)
+
+    filter_parser.add_argument(
+        'query',
+        type = str,
+        help = 'Query to search columns (e.g., "author: `lucretius; title: way things"). Use a backtick for literal search.'
+    )
+
+    get_parser = subparsers.add_parser(
+        'get',
+        help = 'Get a library record.'
+    )
+    get_parser.set_defaults(func=get_record)
+
+    get_parser.add_argument(
+        'id',
+        type = str,
+        help = 'Record ID.'
+    )
+
     add_parser = subparsers.add_parser(
         'add',
         help = 'Add a library record.'
@@ -119,7 +176,25 @@ def main():
     remove_parser.add_argument(
         'id',
         type = str,
-        help = 'Numerical record ID.'
+        help = 'Record ID.'
+    )
+
+    update_parser = subparsers.add_parser(
+        'update',
+        help = 'Update a library record.'
+    )
+    update_parser.set_defaults(func=update_record)
+
+    update_parser.add_argument(
+        'id',
+        type = str,
+        help = 'Record ID.'
+    )
+
+    update_parser.add_argument(
+        'entries',
+        type = str,
+        help = 'Entries to update (e.g., "author: Will Roque; year: 2021").'
     )
 
     args = parser.parse_args()
@@ -127,7 +202,7 @@ def main():
     if 'func' in args:
         args.func(args)
     else:
-        parser.print_help(sys.stderr)
+        print('Interface')
 
 
 if __name__ == '__main__':

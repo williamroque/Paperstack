@@ -1,156 +1,121 @@
 """Provides Library database class."""
 
-import re
+import sqlite3
 
-
-class InvalidRecord(Exception):
-    """A catchall exception for invalid records.
-
-    Attributes
-    ----------
-    message : str
-
-    Parameters
-    ----------
-    message : str
-    """
-
-    def __init__(self, message=None):
-        self.message = 'Invalid record'
-
-        if message is not None:
-            self.message += ': ' + message
-
-        super().__init__(self.message)
-
-
-class Record:
-    """Library record handling validation. This is the most basic data
-    class in the program. Database information will be deserialized into
-    this. Each `Record` instance will be in charge of its own BibTeX entry
-    when exporting.
-
-    Parameters
-    ----------
-    record : dict
-        The entries of the record.
-    record_type : {'article', 'book', 'website'}
-        The type of record.
-
-    Attributes
-    ----------
-    record : dict
-        The entries of the record.
-    record_type : {'article', 'book', 'website'}
-        The type of record.
-    requirements : list
-        A list of requirement tuples.
-
-    """
-
-    def __init__(self, record, record_type):
-        self.record = record
-        self.record_type = record_type
-
-        self.requirements = []
-
-        self.setup()
-
-
-    def validate(self):
-        """Validate record according to requirements. Fields can be marked
-        as required and constraints can be placed based on type and pattern
-        matching.
-
-        Raises
-        ------
-        InvalidRecord
-            Raised when a requirement is not met in the record.
-        """
-
-        for requirement in self.requirements:
-            field, field_type, required, pattern = requirement
-
-            if field in self.record:
-                if not isinstance(self.record[field], field_type):
-                    raise InvalidRecord(
-                        'Expected type `{}` for field `{}`, but instead got {}'.format(
-                            field_type,
-                            field,
-                            type(self.record[field])
-                        )
-                    )
-
-                if not re.match(pattern, self.record[field]):
-                    raise InvalidRecord(
-                        f'Field `{field}` does not match pattern `{pattern}`'
-                    )
-            elif required:
-                raise InvalidRecord(f'Field `{field}` required')
-
-
-    def add_requirement(self, field, field_type, required=True, pattern=None):
-        """Add a field requirement.
-
-        Parameters
-        ----------
-        field : str
-            Which field to add requirement to
-        field_type : any
-            Python type of field
-        required : bool, optional
-            Whether field must exist
-        pattern : str, optional
-            RegEx pattern for field if type is str"""
-
-        self.requirements.append((field, field_type, required, pattern))
-
-
-    def setup(self):
-        "Set up requirements according to record type."
-
-        raise NotImplementedError
-
-
-class Article(Record):
-    """Article record for academic papers.
-
-    Parameters
-    ----------
-    record : dict
-        The entries of the record."""
-
-    def __init__(self, record):
-        super().__init__(record, 'article')
-
-
-    def setup(self):
-        self.add_requirement('author', str, True)
-        self.add_requirement('title', str, True)
-        self.add_requirement('journal', str, True)
-        self.add_requirement('year', int, True)
-        self.add_requirement('volume', int, False)
-        self.add_requirement('number', int, False)
-        self.add_requirement('pages', str, False)
-        self.add_requirement('month', str, False)
-        self.add_requirement('doi', str, False)
-        self.add_requirement('issn', str, False)
-        self.add_requirement('note', str, False)
+from paperstack.filesystem.file import File
 
 
 class Library:
-    "Library class."
+    """Library class. This is in charge of communicating with the database
+    and creating `Record` instances.
 
-    def __init__(self, path):
-        self.path = path
+    Parameters
+    -----------
+    config : paperstack.filesystem.config.Config
+        `Config` instance.
+
+    Attributes
+    ----------
+    config : paperstack.filesystem.config.Config
+        `Config` instance.
+    data_dir : paperstack.filesystem.file.File
+        The directory where library data will be stored.
+    connection : sqlite3.Connection
+    """
+
+    def __init__(self, config):
+        self.config = config
+
+        self.data_dir = File(
+            self.config.get('paths', 'data'),
+            True
+        )
+        self.data_dir.ensure()
+
+        self.connection = None
+        self.cursor = None
+
+        self.connect()
+
+        self.cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS library (
+                record_id INTEGER PRIMARY KEY,
+                record_type TEXT,
+                author TEXT,
+                organization TEXT,
+                title TEXT,
+                journal TEXT,
+                publisher TEXT,
+                year TEXT,
+                volume TEXT,
+                series TEXT,
+                number TEXT,
+                pages TEXT,
+                month TEXT,
+                address TEXT,
+                edition TEXT,
+                howpublished TEXT,
+                url TEXT,
+                urldate TEXT,
+                doi TEXT,
+                issn TEXT,
+                bibnote TEXT,
+                note TEXT,
+                bibcode TEXT,
+                arxiv TEXT,
+                path TEXT
+            )
+            """
+        )
+
+
+    def connect(self):
+        "Connect to sqlite3 library database."
+
+        self.connection = sqlite3.connect(
+            self.data_dir.join('library.db')
+        )
+        self.cursor = self.connection.cursor()
+
+
+    def commit(self):
+        "Commit a change to the database."
+
+        self.connection.commit()
+
+
+    def close(self):
+        "Close connection to library database."
+
+        if self.connection is not None:
+            self.connection.close()
+            self.connection = None
+            self.cursor = None
 
 
     def add(self, record):
-        pass
+        """Use record SQL export to add to library.
+
+        Parameters
+        ----------
+        record : paperstack.data.record.Record
+        """
+
+        self.cursor.execute(record.to_sql())
 
 
     def remove(self, record_id):
-        pass
+        """Remove record using record ID.
+
+        Parameters
+        ----------
+        record_id : int
+        """
+
+        self.cursor.execute(
+            f'DELETE FROM library WHERE record_id = {record_id}'
+        )
 
 
     def update(self, arg):
@@ -158,4 +123,29 @@ class Library:
 
 
     def filter(self, filters):
-        pass
+        """Select all items satisfying filters and build records.
+
+        Parameters
+        ----------
+        filters : list
+            Each filter is a tuple with (field, query).
+        """
+
+        if len(filters):
+            filter_strings = []
+
+            for field, query in filters:
+                query = query.replace('"', '')
+                filter_strings.append(f'{field} LIKE "%{query}%"')
+
+            filter_string = ', '.join(filter_strings)
+
+            result = self.connection.execute(
+                f'SELECT * FROM library WHERE {filter_string}'
+            )
+        else:
+            result = self.connection.execute(f'SELECT * FROM library')
+
+        result = result.fetchall()
+
+        print(result)

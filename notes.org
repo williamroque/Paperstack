@@ -21,16 +21,18 @@
 - Detect new files, add to index automatically by prompting
 - Batch import papers
 - Add websites and books to library as well
+- Show only a few special columns in table
+  - When searching, show and highlight columns being searched
 
 * Roadmap
 
-- [ ] Set up argparse
-- [ ] Set up config file
-- [ ] Set up file structure
-- [ ] Set up database (with websites and books)
-  - [ ] Adding (raw)
+- [X] Set up argparse
+- [X] Set up config file
+- [X] Set up file structure
+- [-] Set up database (with websites and books)
+  - [X] Adding (raw)
   - [ ] Editing (raw)
-  - [ ] Removing
+  - [X] Removing
 - [ ] Set up search
 - [ ] Set up scraping
 - [ ] Set up BibTeX export

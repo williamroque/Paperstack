@@ -245,6 +245,11 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-paperstack.data.record">
+   paperstack.data.record module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#module-paperstack.data">
    Module contents
   </a>
@@ -279,6 +284,11 @@ title="Print to PDF"
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-paperstack.data.record">
+   paperstack.data.record module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#module-paperstack.data">
    Module contents
   </a>
@@ -301,31 +311,99 @@ title="Print to PDF"
 <section id="module-paperstack.data.library">
 <span id="paperstack-data-library-module"></span><h2>paperstack.data.library module<a class="headerlink" href="#module-paperstack.data.library" title="Permalink to this headline">#</a></h2>
 <p>Provides Library database class.</p>
-<dl class="py exception">
-<dt class="sig sig-object py" id="paperstack.data.library.InvalidRecord">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">paperstack.data.library.</span></span><span class="sig-name descname"><span class="pre">InvalidRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Invalid</span> <span class="pre">record.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.InvalidRecord" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="paperstack.data.library.Library">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">paperstack.data.library.</span></span><span class="sig-name descname"><span class="pre">Library</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Library" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">paperstack.data.library.</span></span><span class="sig-name descname"><span class="pre">Library</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Library" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Library class.</p>
+<p>Library class. This is in charge of communicating with the database
+and creating <cite>Record</cite> instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config</strong> (<a class="reference internal" href="paperstack.filesystem.html#paperstack.filesystem.config.Config" title="paperstack.filesystem.config.Config"><em>paperstack.filesystem.config.Config</em></a>) – <cite>Config</cite> instance.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="paperstack.data.library.Library.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#paperstack.data.library.Library.config" title="Permalink to this definition">#</a></dt>
+<dd><p><cite>Config</cite> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="paperstack.filesystem.html#paperstack.filesystem.config.Config" title="paperstack.filesystem.config.Config">paperstack.filesystem.config.Config</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="paperstack.data.library.Library.data_dir">
+<span class="sig-name descname"><span class="pre">data_dir</span></span><a class="headerlink" href="#paperstack.data.library.Library.data_dir" title="Permalink to this definition">#</a></dt>
+<dd><p>The directory where library data will be stored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="paperstack.filesystem.html#paperstack.filesystem.file.File" title="paperstack.filesystem.file.File">paperstack.filesystem.file.File</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="paperstack.data.library.Library.connection">
+<span class="sig-name descname"><span class="pre">connection</span></span><a class="headerlink" href="#paperstack.data.library.Library.connection" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>sqlite3.Connection</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="paperstack.data.library.Library.add">
 <span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Library.add" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Use record SQL export to add to library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>record</strong> (<a class="reference internal" href="#paperstack.data.record.Record" title="paperstack.data.record.Record"><em>paperstack.data.record.Record</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="paperstack.data.library.Library.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Library.close" title="Permalink to this definition">#</a></dt>
+<dd><p>Close connection to library database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="paperstack.data.library.Library.commit">
+<span class="sig-name descname"><span class="pre">commit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Library.commit" title="Permalink to this definition">#</a></dt>
+<dd><p>Commit a change to the database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="paperstack.data.library.Library.connect">
+<span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Library.connect" title="Permalink to this definition">#</a></dt>
+<dd><p>Connect to sqlite3 library database.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="paperstack.data.library.Library.filter">
 <span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Library.filter" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Select all items satisfying filters and build records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filters</strong> (<em>list</em>) – Each filter is a tuple with (field, query).</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="paperstack.data.library.Library.remove">
 <span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Library.remove" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><p>Remove record using record ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>record_id</strong> (<em>int</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="paperstack.data.library.Library.update">
@@ -334,25 +412,75 @@ title="Print to PDF"
 
 </dd></dl>
 
+</section>
+<section id="module-paperstack.data.record">
+<span id="paperstack-data-record-module"></span><h2>paperstack.data.record module<a class="headerlink" href="#module-paperstack.data.record" title="Permalink to this headline">#</a></h2>
+<p>Module providing Record base data class.</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="paperstack.data.library.Record">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">paperstack.data.library.</span></span><span class="sig-name descname"><span class="pre">Record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Record" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Library record handling validation.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="paperstack.data.library.Record.record_type">
-<span class="sig-name descname"><span class="pre">record_type</span></span><a class="headerlink" href="#paperstack.data.library.Record.record_type" title="Permalink to this definition">#</a></dt>
-<dd><p>The type of record.</p>
+<dt class="sig sig-object py" id="paperstack.data.record.Article">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">paperstack.data.record.</span></span><span class="sig-name descname"><span class="pre">Article</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.record.Article" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#paperstack.data.record.Record" title="paperstack.data.record.Record"><code class="xref py py-class docutils literal notranslate"><span class="pre">paperstack.data.record.Record</span></code></a></p>
+<p>Article record for academic papers.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>record</strong> (<em>dict</em>) – The entries of the record.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="paperstack.data.record.Article.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.record.Article.setup" title="Permalink to this definition">#</a></dt>
+<dd><p>Set up requirements according to record type.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="paperstack.data.record.Article.to_sql">
+<span class="sig-name descname"><span class="pre">to_sql</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.record.Article.to_sql" title="Permalink to this definition">#</a></dt>
+<dd><p>Export to SQL (SQL insert command).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="paperstack.data.record.InvalidRecord">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">paperstack.data.record.</span></span><span class="sig-name descname"><span class="pre">InvalidRecord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.record.InvalidRecord" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>A catchall exception for invalid records.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="paperstack.data.record.InvalidRecord.message">
+<span class="sig-name descname"><span class="pre">message</span></span><a class="headerlink" href="#paperstack.data.record.InvalidRecord.message" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
 <dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>{‘article’, ‘book’, ‘website’}</p>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>
 
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="paperstack.data.record.Record">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">paperstack.data.record.</span></span><span class="sig-name descname"><span class="pre">Record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.record.Record" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Library record handling validation. This is the most basic data
+class in the program. Database information will be deserialized into
+this. Each <cite>Record</cite> instance will be in charge of its own BibTeX entry
+when exporting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>record</strong> (<em>dict</em>) – The entries of the record.</p></li>
+<li><p><strong>record_type</strong> (<em>{'article'</em><em>, </em><em>'book'</em><em>, </em><em>'website'}</em>) – The type of record.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="paperstack.data.library.Record.record">
-<span class="sig-name descname"><span class="pre">record</span></span><a class="headerlink" href="#paperstack.data.library.Record.record" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="paperstack.data.record.Record.record">
+<span class="sig-name descname"><span class="pre">record</span></span><a class="headerlink" href="#paperstack.data.record.Record.record" title="Permalink to this definition">#</a></dt>
 <dd><p>The entries of the record.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -362,8 +490,19 @@ title="Print to PDF"
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="paperstack.data.library.Record.requirements">
-<span class="sig-name descname"><span class="pre">requirements</span></span><a class="headerlink" href="#paperstack.data.library.Record.requirements" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="paperstack.data.record.Record.record_type">
+<span class="sig-name descname"><span class="pre">record_type</span></span><a class="headerlink" href="#paperstack.data.record.Record.record_type" title="Permalink to this definition">#</a></dt>
+<dd><p>The type of record.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>{‘article’, ‘book’, ‘website’}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="paperstack.data.record.Record.requirements">
+<span class="sig-name descname"><span class="pre">requirements</span></span><a class="headerlink" href="#paperstack.data.record.Record.requirements" title="Permalink to this definition">#</a></dt>
 <dd><p>A list of requirement tuples.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -373,8 +512,8 @@ title="Print to PDF"
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="paperstack.data.library.Record.add_requirement">
-<span class="sig-name descname"><span class="pre">add_requirement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Record.add_requirement" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="paperstack.data.record.Record.add_requirement">
+<span class="sig-name descname"><span class="pre">add_requirement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.record.Record.add_requirement" title="Permalink to this definition">#</a></dt>
 <dd><p>Add a field requirement.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -389,15 +528,28 @@ title="Print to PDF"
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="paperstack.data.library.Record.setup">
-<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Record.setup" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="paperstack.data.record.Record.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.record.Record.setup" title="Permalink to this definition">#</a></dt>
 <dd><p>Set up requirements according to record type.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="paperstack.data.library.Record.validate">
-<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.library.Record.validate" title="Permalink to this definition">#</a></dt>
-<dd><p>Validate record according to record type.</p>
+<dt class="sig sig-object py" id="paperstack.data.record.Record.to_sql">
+<span class="sig-name descname"><span class="pre">to_sql</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.record.Record.to_sql" title="Permalink to this definition">#</a></dt>
+<dd><p>Export to SQL (SQL insert command).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="paperstack.data.record.Record.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.data.record.Record.validate" title="Permalink to this definition">#</a></dt>
+<dd><p>Validate record according to requirements. Fields can be marked
+as required and constraints can be placed based on type and pattern
+matching.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#paperstack.data.record.InvalidRecord" title="paperstack.data.record.InvalidRecord"><strong>InvalidRecord</strong></a> – Raised when a requirement is not met in the record.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

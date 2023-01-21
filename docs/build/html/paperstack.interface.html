@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Welcome to Paperstack’s documentation! &#8212; Paperstack  documentation</title>
+    <title>paperstack.interface package &#8212; Paperstack  documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -33,7 +33,7 @@
     <script src="_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="paperstack" href="modules.html" />
+    <link rel="prev" title="paperstack.filesystem package" href="paperstack.filesystem.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
     
@@ -68,7 +68,7 @@
 <div class="bd-sidebar noprint" id="site-navigation">
     <div class="bd-sidebar__content">
         <div class="bd-sidebar__top"><div class="navbar-brand-box">
-    <a class="navbar-brand text-wrap" href="#">
+    <a class="navbar-brand text-wrap" href="index.html">
       
       
       
@@ -85,27 +85,27 @@
   Contents:
  </span>
 </p>
-<ul class="nav bd-sidenav">
- <li class="toctree-l1 has-children">
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active has-children">
   <a class="reference internal" href="modules.html">
    paperstack
   </a>
-  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
   <label for="toctree-checkbox-1">
    <i class="fas fa-chevron-down">
    </i>
   </label>
-  <ul>
-   <li class="toctree-l2 has-children">
+  <ul class="current">
+   <li class="toctree-l2 current active has-children">
     <a class="reference internal" href="paperstack.html">
      paperstack package
     </a>
-    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
     <label for="toctree-checkbox-2">
      <i class="fas fa-chevron-down">
      </i>
     </label>
-    <ul>
+    <ul class="current">
      <li class="toctree-l3">
       <a class="reference internal" href="paperstack.data.html">
        paperstack.data package
@@ -116,8 +116,8 @@
        paperstack.filesystem package
       </a>
      </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="paperstack.interface.html">
+     <li class="toctree-l3 current active">
+      <a class="current reference internal" href="#">
        paperstack.interface package
       </a>
      </li>
@@ -198,7 +198,7 @@ title="Fullscreen mode"
   <div class="menu-dropdown__content">
     <ul>
       <li>
-        <a href="_sources/index.rst.txt"
+        <a href="_sources/paperstack.interface.rst.txt"
    class="headerbtn"
    data-toggle="tooltip"
 data-placement="left"
@@ -257,14 +257,19 @@ title="Print to PDF"
     </div>
     <nav id="bd-toc-nav" aria-label="Page">
         <ul class="visible nav section-nav flex-column">
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#">
-   Welcome to Paperstack’s documentation!
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#submodules">
+   Submodules
   </a>
  </li>
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#indices-and-tables">
-   Indices and tables
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-paperstack.interface.message">
+   paperstack.interface.message module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-paperstack.interface">
+   Module contents
   </a>
  </li>
 </ul>
@@ -276,7 +281,7 @@ title="Print to PDF"
         <div class="col pl-md-3 pl-lg-5 content-container">
             <!-- Table of contents that is only displayed when printing the page -->
             <div id="jb-print-docs-body" class="onlyprint">
-                <h1>Welcome to Paperstack’s documentation!</h1>
+                <h1>paperstack.interface package</h1>
                 <!-- Table of contents -->
                 <div id="print-main-content">
                     <div id="jb-print-toc">
@@ -286,14 +291,19 @@ title="Print to PDF"
                         </div>
                         <nav aria-label="Page">
                             <ul class="visible nav section-nav flex-column">
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#">
-   Welcome to Paperstack’s documentation!
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#submodules">
+   Submodules
   </a>
  </li>
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#indices-and-tables">
-   Indices and tables
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-paperstack.interface.message">
+   paperstack.interface.message module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#module-paperstack.interface">
+   Module contents
   </a>
  </li>
 </ul>
@@ -306,29 +316,66 @@ title="Print to PDF"
                 
               <div>
                 
-  <section id="welcome-to-paperstack-s-documentation">
-<h1>Welcome to Paperstack’s documentation!<a class="headerlink" href="#welcome-to-paperstack-s-documentation" title="Permalink to this headline">#</a></h1>
-<div class="toctree-wrapper compound">
-<p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">paperstack</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="paperstack.html">paperstack package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="paperstack.html#subpackages">Subpackages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="paperstack.html#module-paperstack">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</div>
+  <section id="paperstack-interface-package">
+<h1>paperstack.interface package<a class="headerlink" href="#paperstack-interface-package" title="Permalink to this headline">#</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">#</a></h2>
 </section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">#</a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
+<section id="module-paperstack.interface.message">
+<span id="paperstack-interface-message-module"></span><h2>paperstack.interface.message module<a class="headerlink" href="#module-paperstack.interface.message" title="Permalink to this headline">#</a></h2>
+<p>Module responsible for handling messages to the user.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="paperstack.interface.message.Messenger">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">paperstack.interface.message.</span></span><span class="sig-name descname"><span class="pre">Messenger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ansi_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.interface.message.Messenger" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Proudly deliver messages to the user in a timely manner. Children of
+this messenger will surpass it in talent and style.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ansi_colors</strong> (<em>bool</em>) – If true, print with special colors using ANSI escape sequences.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="paperstack.interface.message.Messenger.ansi_colors">
+<span class="sig-name descname"><span class="pre">ansi_colors</span></span><a class="headerlink" href="#paperstack.interface.message.Messenger.ansi_colors" title="Permalink to this definition">#</a></dt>
+<dd><p>If true, print with special colors using ANSI escape sequences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="paperstack.interface.message.Messenger.send_error">
+<span class="sig-name descname"><span class="pre">send_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.interface.message.Messenger.send_error" title="Permalink to this definition">#</a></dt>
+<dd><p>Send error message in accordance with the medium. Print by
+default. Quit.</p>
+<p>message : str</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="paperstack.interface.message.Messenger.send_neutral">
+<span class="sig-name descname"><span class="pre">send_neutral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.interface.message.Messenger.send_neutral" title="Permalink to this definition">#</a></dt>
+<dd><p>Send neutral message in accordance with the medium. Print by
+default.</p>
+<p>message : str</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="paperstack.interface.message.Messenger.send_success">
+<span class="sig-name descname"><span class="pre">send_success</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#paperstack.interface.message.Messenger.send_success" title="Permalink to this definition">#</a></dt>
+<dd><p>Send success message in accordance with the medium. Print by
+default.</p>
+<p>message : str</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-paperstack.interface">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-paperstack.interface" title="Permalink to this headline">#</a></h2>
+</section>
 </section>
 
 
@@ -339,12 +386,12 @@ title="Print to PDF"
                 
     <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='right-next' id="next-link" href="modules.html" title="next page">
-    <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">paperstack</p>
-    </div>
-    <i class="fas fa-angle-right"></i>
+    <a class='left-prev' id="prev-link" href="paperstack.filesystem.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">paperstack.filesystem package</p>
+        </div>
     </a>
 </div>
             </footer>

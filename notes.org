@@ -46,4 +46,4 @@
 - [ ] Add papers
 - [ ] Detect new files in directory, scrape and add
 - [ ] Batch import
-- [ ] Add installation guide and proper introduction to documentation
+- [ ] Add installation guide and nice, user-friendly documentation

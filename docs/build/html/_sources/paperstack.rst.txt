@@ -8,6 +8,8 @@ Subpackages
    :maxdepth: 4
 
    paperstack.data
+   paperstack.filesystem
+   paperstack.interface
 
 Module contents
 ---------------

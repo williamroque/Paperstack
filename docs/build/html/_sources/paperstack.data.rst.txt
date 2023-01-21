@@ -12,6 +12,14 @@ paperstack.data.library module
    :undoc-members:
    :show-inheritance:
 
+paperstack.data.record module
+-----------------------------
+
+.. automodule:: paperstack.data.record
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

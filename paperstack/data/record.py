@@ -200,7 +200,9 @@ class Record:
 
             record_id = record_id.replace(f'{field}@{length}', sub)
 
-        record_id = re.sub(r'\s', '-', record_id).lower()
+        record_id = re.sub(r'\s', '-', record_id)
+        record_id = re.sub(r'[^0-9A-Za-z-]', '', record_id)
+        record_id = record_id.lower()
 
         return record_id
 

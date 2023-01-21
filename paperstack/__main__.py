@@ -134,7 +134,7 @@ def main():
     filter_parser.add_argument(
         'query',
         type = str,
-        help = 'Query to search columns (e.g., "author: cretiu; title: the way things").'
+        help = 'Query to search columns (e.g., "author: `lucretius; title: way things"). Use a backtick for literal search.'
     )
 
     get_parser = subparsers.add_parser(

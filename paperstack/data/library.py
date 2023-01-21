@@ -177,8 +177,13 @@ class Library:
                 filter_strings = []
 
                 for field, query in filters:
+                    query = query.strip()
                     query = query.replace('"', '')
-                    filter_strings.append(f'{field} LIKE "%{query}%"')
+
+                    if query[0] == '`':
+                        filter_strings.append(f'{field} = "{query[1:]}"')
+                    else:
+                        filter_strings.append(f'{field} LIKE "%{query}%"')
 
                 filter_string = ', '.join(filter_strings)
 

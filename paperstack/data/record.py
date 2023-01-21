@@ -61,8 +61,6 @@ class Record:
 
 
     def __str__(self):
-        output = ''
-
         record = {}
 
         for key, value in self.record.items():
@@ -74,9 +72,15 @@ class Record:
 
                 record[key] = value
 
-        output += ' │ '.join(record.keys())
+        output = '│ ' + ' │ '.join(record.keys()) + ' │'
+
+        header_width = len(output) - 2
+
         output += '\n'
-        output += ' │ '.join(record.values())
+        output += '│ ' + ' │ '.join(record.values()) + ' │'
+
+        output = '┌' + '─' * header_width + '┐' + '\n' + output
+        output += '\n' + '└' + '─' * header_width + '┘'
 
         return output
 

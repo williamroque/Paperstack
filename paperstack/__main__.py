@@ -5,21 +5,27 @@ import argparse
 import sys
 
 from paperstack.data.library import Library
-from paperstack.data.record import Article, record_constructors
+from paperstack.data.record import record_constructors
 from paperstack.filesystem.config import Config
 from paperstack.interface.message import Messenger
+from paperstack.utility import parse_dict
 
 
 def list_records(args):
     config = Config(args.config_path)
-    library = Library(config)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
 
-    library.filter([])
+    records = library.filter([])
+
+    for record in records:
+        messenger.send_neutral(record)
 
 
 def add_record(args):
     config = Config(args.config_path)
-    library = Library(config)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)
 
@@ -28,16 +34,7 @@ def add_record(args):
 
     constructor = record_constructors[args.type]
 
-    record_dict = {}
-    entries = args.entries.split(';')
-
-    for entry in entries:
-        if entry.strip():
-            key, value = entry.split(':')
-
-            record_dict[key.strip()] = value.strip()
-
-    record = constructor(record_dict)
+    record = constructor(parse_dict(args.entries))
 
     library.add(record)
     library.commit()
@@ -47,7 +44,8 @@ def add_record(args):
 
 def remove_record(args):
     config = Config(args.config_path)
-    library = Library(config)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)
 
@@ -59,20 +57,12 @@ def remove_record(args):
 
 def update_record(args):
     config = Config(args.config_path)
-    library = Library(config)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)
 
-    entries_dict = {}
-    entries = args.entries.split(';')
-
-    for entry in entries:
-        if entry.strip():
-            key, value = entry.split(':')
-
-            entries_dict[key.strip()] = value.strip()
-
-    library.update(args.id, entries_dict)
+    library.update(args.id, parse_dict(args.entries))
     library.commit()
 
     messenger.send_success('Updated item.')
@@ -80,7 +70,8 @@ def update_record(args):
 
 def get_record(args):
     config = Config(args.config_path)
-    library = Library(config)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)
 

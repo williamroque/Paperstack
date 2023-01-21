@@ -15,18 +15,21 @@ class Library:
     -----------
     config : paperstack.filesystem.config.Config
         `Config` instance.
+    messenger : paperstack.interface.message.Messenger
 
     Attributes
     ----------
     config : paperstack.filesystem.config.Config
         `Config` instance.
+    messenger : paperstack.interface.message.Messenger
     data_dir : paperstack.filesystem.file.File
         The directory where library data will be stored.
     connection : sqlite3.Connection
     """
 
-    def __init__(self, config):
+    def __init__(self, config, messenger):
         self.config = config
+        self.messenger = messenger
 
         self.data_dir = File(
             self.config.get('paths', 'data'),
@@ -80,7 +83,12 @@ class Library:
         record : paperstack.data.record.Record
         """
 
-        self.cursor.execute(record.to_sql())
+        try:
+            self.cursor.execute(record.to_sql())
+        except sqlite3.OperationalError:
+            self.messenger.send_error(
+                'Bad query. Make sure all columns exist.'
+            )
 
 
     def remove(self, record_id):
@@ -91,9 +99,14 @@ class Library:
         record_id : int
         """
 
-        self.cursor.execute(
-            f'DELETE FROM library WHERE record_id = {record_id}'
-        )
+        try:
+            self.cursor.execute(
+                f'DELETE FROM library WHERE record_id = {record_id}'
+            )
+        except sqlite3.OperationalError:
+            self.messenger.send_error(
+                'Bad query. Make sure all columns exist.'
+            )
 
 
     def update(self, record_id, entries):
@@ -115,9 +128,14 @@ class Library:
 
         update_string = ', '.join(update_strings)
 
-        self.cursor.execute(
-            f'UPDATE library SET {update_string} WHERE record_id = {record_id}'
-        )
+        try:
+            self.cursor.execute(
+                f'UPDATE library SET {update_string} WHERE record_id = {record_id}'
+            )
+        except sqlite3.OperationalError:
+            self.messenger.send_error(
+                'Bad query. Make sure all columns exist.'
+            )
 
 
     def get(self, record_id):
@@ -132,10 +150,15 @@ class Library:
         paperstack.data.record.Record
         """
 
-        result = self.connection.execute(
-            f'SELECT * FROM library WHERE record_id = "{record_id}"'
-        )
-        result = result.fetchall()[0]
+        try:
+            result = self.connection.execute(
+                f'SELECT * FROM library WHERE record_id = "{record_id}"'
+            )
+            result = result.fetchall()[0]
+        except sqlite3.OperationalError:
+            self.messenger.send_error(
+                'Bad query. Make sure all columns exist.'
+            )
 
         return build_record(result)
 
@@ -149,21 +172,28 @@ class Library:
             Each filter is a tuple with (field, query).
         """
 
-        if len(filters):
-            filter_strings = []
+        try:
+            if len(filters):
+                filter_strings = []
 
-            for field, query in filters:
-                query = query.replace('"', '')
-                filter_strings.append(f'{field} LIKE "%{query}%"')
+                for field, query in filters:
+                    query = query.replace('"', '')
+                    filter_strings.append(f'{field} LIKE "%{query}%"')
 
-            filter_string = ', '.join(filter_strings)
+                filter_string = ', '.join(filter_strings)
 
-            result = self.connection.execute(
-                f'SELECT * FROM library WHERE {filter_string}'
+                result = self.connection.execute(
+                    f'SELECT * FROM library WHERE {filter_string}'
+                )
+            else:
+                result = self.connection.execute(f'SELECT * FROM library')
+
+            result = result.fetchall()
+        except sqlite3.OperationalError:
+            self.messenger.send_error(
+                'Bad query. Make sure all columns exist.'
             )
-        else:
-            result = self.connection.execute(f'SELECT * FROM library')
 
-        result = result.fetchall()
+        records = list(map(build_record, result))
 
-        print(result)
+        return records

@@ -2,7 +2,7 @@
 
 * Goals
 
-- Create UI using framework like Textual (though perhaps more cross-compatible)
+- Create UI using Urwid
 - Pure command-based interface also possible (communication with other programs)
 - Add papers easily (automatically/manually)
 - Submit eventually to PyPI
@@ -21,5 +21,29 @@
 - Detect new files, add to index automatically by prompting
 - Batch import papers
 - Add websites and books to library as well
+- Show only a few special columns in table
+  - When searching, show and highlight columns being searched
 
 * Roadmap
+
+- [X] Set up argparse
+- [X] Set up config file
+- [X] Set up file structure
+- [-] Set up database (with websites and books)
+  - [X] Adding (raw)
+  - [ ] Editing (raw)
+  - [X] Removing
+- [ ] Set up search
+- [ ] Set up scraping
+- [ ] Set up BibTeX export
+- [X] Start writing good documentation
+- [ ] Set up UI
+- [ ] Add table and preview
+  - [ ] Add markdown support for notes
+- [ ] Add actions (commands in lower panel)
+- [ ] Add marks (selection)
+- [ ] Add search
+- [ ] Add papers
+- [ ] Detect new files in directory, scrape and add
+- [ ] Batch import
+- [ ] Add installation guide and nice, user-friendly documentation

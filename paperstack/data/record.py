@@ -5,27 +5,6 @@ import re
 from paperstack.data.constants import COLUMNS
 
 
-class InvalidRecord(Exception):
-    """A catchall exception for invalid records.
-
-    Attributes
-    ----------
-    message : str
-
-    Parameters
-    ----------
-    message : str
-    """
-
-    def __init__(self, message=None):
-        self.message = 'Invalid record'
-
-        if message is not None:
-            self.message += ': ' + message
-
-        super().__init__(self.message)
-
-
 class Record:
     """Library record handling validation. This is the most basic data
     class in the program. Database information will be deserialized into
@@ -36,23 +15,24 @@ class Record:
     ----------
     record : dict
         The entries of the record.
-    record_type : {'article', 'book', 'website'}
-        The type of record.
+    messenger : paperstack.interface.message.Messenger
 
     Attributes
     ----------
+    RECORD_TYPE : {'article', 'book', 'website'}
+        The type of record.
     record : dict
         The entries of the record.
-    record_type : {'article', 'book', 'website'}
-        The type of record.
+    messenger : paperstack.interface.message.Messenger
     requirements : list
         A list of requirement tuples.
     """
 
     RECORD_TYPE = None
 
-    def __init__(self, record):
+    def __init__(self, record, messenger):
         self.record = record
+        self.messenger = messenger
 
         self.requirements = []
 
@@ -89,11 +69,6 @@ class Record:
         """Validate record according to requirements. Fields can be marked
         as required and constraints can be placed based on type and pattern
         matching.
-
-        Raises
-        ------
-        InvalidRecord
-            Raised when a requirement is not met in the record.
         """
 
         for requirement in self.requirements:
@@ -101,8 +76,8 @@ class Record:
 
             if field in self.record and self.record[field] is not None:
                 if not isinstance(self.record[field], field_type):
-                    raise InvalidRecord(
-                        'Expected type `{}` for field "{}", but instead got `{}`'.format(
+                    self.messenger.send_error(
+                        'Invalid record. Expected type `{}` for field "{}", but instead got `{}`'.format(
                             field_type.__name__,
                             field,
                             type(self.record[field]).__name__
@@ -110,11 +85,11 @@ class Record:
                     )
 
                 if pattern is not None and not re.match(pattern, self.record[field]):
-                    raise InvalidRecord(
-                        f'Field `{field}` does not match pattern `{pattern}`'
+                    self.messenger.send_error(
+                        f'Invalid record. Field `{field}` does not match pattern `{pattern}`'
                     )
             elif required:
-                raise InvalidRecord(f'Field `{field}` required')
+                self.messenger.send_error(f'Invalid record. Field `{field}` required')
             else:
                 self.record[field] = None
 
@@ -170,8 +145,8 @@ class Article(Record):
 
     RECORD_TYPE = 'article'
 
-    def __init__(self, record):
-        super().__init__(record)
+    def __init__(self, record, messenger):
+        super().__init__(record, messenger)
 
 
     def setup(self):
@@ -196,13 +171,14 @@ record_constructors = {
 }
 
 
-def build_record(record_list):
+def build_record(record_list, messenger):
     """Build `Record` instance from well-ordered record list. This is the
     type of list that would come from a SELECT query.
 
     Parameters
     ----------
     record_list : list
+    messenger : paperstack.interface.message.Messenger
     """
 
     _, record_type, *record_list = record_list
@@ -215,6 +191,6 @@ def build_record(record_list):
 
     constructor = record_constructors[record_type]
 
-    record = constructor(record_dict)
+    record = constructor(record_dict, messenger)
 
     return record

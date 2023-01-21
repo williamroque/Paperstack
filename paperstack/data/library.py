@@ -1,6 +1,7 @@
 """Provides Library database class."""
 
 import sqlite3
+from functools import partial
 
 from paperstack.filesystem.file import File
 from paperstack.data.constants import COLUMNS
@@ -160,7 +161,7 @@ class Library:
                 'Bad query. Make sure all columns exist.'
             )
 
-        return build_record(result)
+        return build_record(result, self.messenger)
 
 
     def filter(self, filters):
@@ -199,6 +200,6 @@ class Library:
                 'Bad query. Make sure all columns exist.'
             )
 
-        records = list(map(build_record, result))
+        records = [build_record(row, self.messenger) for row in result]
 
         return records

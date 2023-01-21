@@ -48,7 +48,7 @@ def add_record(args):
 
     constructor = record_constructors[args.type]
 
-    record = constructor(parse_dict(args.entries))
+    record = constructor(parse_dict(args.entries), messenger)
 
     library.add(record)
     library.commit()
@@ -146,7 +146,7 @@ def main():
     get_parser.add_argument(
         'id',
         type = str,
-        help = 'Numerical record ID.'
+        help = 'Record ID.'
     )
 
     add_parser = subparsers.add_parser(
@@ -176,19 +176,19 @@ def main():
     remove_parser.add_argument(
         'id',
         type = str,
-        help = 'Numerical record ID.'
+        help = 'Record ID.'
     )
 
     update_parser = subparsers.add_parser(
         'update',
-        help = 'update a library record.'
+        help = 'Update a library record.'
     )
     update_parser.set_defaults(func=update_record)
 
     update_parser.add_argument(
         'id',
         type = str,
-        help = 'Numerical record ID.'
+        help = 'Record ID.'
     )
 
     update_parser.add_argument(
@@ -202,7 +202,7 @@ def main():
     if 'func' in args:
         args.func(args)
     else:
-        parser.print_help(sys.stderr)
+        print('Interface')
 
 
 if __name__ == '__main__':

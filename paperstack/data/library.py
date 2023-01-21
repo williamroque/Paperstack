@@ -3,6 +3,8 @@
 import sqlite3
 
 from paperstack.filesystem.file import File
+from paperstack.data.constants import COLUMNS
+from paperstack.data.record import build_record
 
 
 class Library:
@@ -37,36 +39,12 @@ class Library:
 
         self.connect()
 
+        columns_string = ', '.join(
+            ' '.join(column) for column in COLUMNS
+        )
+
         self.cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS library (
-                record_id INTEGER PRIMARY KEY,
-                record_type TEXT,
-                author TEXT,
-                organization TEXT,
-                title TEXT,
-                journal TEXT,
-                publisher TEXT,
-                year TEXT,
-                volume TEXT,
-                series TEXT,
-                number TEXT,
-                pages TEXT,
-                month TEXT,
-                address TEXT,
-                edition TEXT,
-                howpublished TEXT,
-                url TEXT,
-                urldate TEXT,
-                doi TEXT,
-                issn TEXT,
-                bibnote TEXT,
-                note TEXT,
-                bibcode TEXT,
-                arxiv TEXT,
-                path TEXT
-            )
-            """
+            f'CREATE TABLE IF NOT EXISTS library ({columns_string})'
         )
 
 
@@ -118,8 +96,48 @@ class Library:
         )
 
 
-    def update(self, arg):
-        pass
+    def update(self, record_id, entries):
+        """Use record SQL export to update entry in library.
+
+        Parameters
+        ----------
+        record_id : int
+        entries : dict
+            Dictionary containing the fields and values to update.
+        """
+
+        update_strings = []
+
+        for field, value in entries.items():
+            value = value.replace('"', '%QUOTE')
+
+            update_strings.append(f'{field} = "{value}"')
+
+        update_string = ', '.join(update_strings)
+
+        self.cursor.execute(
+            f'UPDATE library SET {update_string} WHERE record_id = {record_id}'
+        )
+
+
+    def get(self, record_id):
+        """Select item corresponding to record id.
+
+        Parameters
+        ----------
+        record_id : str
+
+        Returns
+        -------
+        paperstack.data.record.Record
+        """
+
+        result = self.connection.execute(
+            f'SELECT * FROM library WHERE record_id = "{record_id}"'
+        )
+        result = result.fetchall()[0]
+
+        return build_record(result)
 
 
     def filter(self, filters):

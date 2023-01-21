@@ -23,5 +23,6 @@ COLUMNS = (
     ('note', 'TEXT'),
     ('bibcode', 'TEXT'),
     ('arxiv', 'TEXT'),
-    ('path', 'TEXT')
+    ('path', 'TEXT'),
+    ('tags', 'TEXT')
 )

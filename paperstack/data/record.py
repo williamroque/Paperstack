@@ -184,6 +184,7 @@ class Article(Record):
         self.add_requirement('bibnote', str, False)
         self.add_requirement('note', str, False)
         self.add_requirement('path', str, False)
+        self.add_requirement('tags', str, False)
 
 
 record_constructors = {
@@ -204,7 +205,8 @@ def build_record(record_list):
     columns = COLUMNS[2:]
 
     record_dict = {
-        columns[i][0] : value for i, value in enumerate(record_list)
+        columns[i][0] : value.replace('%QUOTE', '"') if value else value
+        for i, value in enumerate(record_list)
     }
 
     constructor = record_constructors[record_type]

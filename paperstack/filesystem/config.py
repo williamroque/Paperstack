@@ -1,6 +1,7 @@
 "Home to the `Config` class. This is where configuration is done."
 
 import configparser
+import os
 
 from paperstack.filesystem.file import File
 
@@ -28,7 +29,10 @@ class Config:
 
     def __init__(self, config_path=None):
         if config_path is None:
-            config_path = '~/.paperstack.cfg'
+            if 'PAPERSTACKCONFIG' in os.environ:
+                config_path = os.environ['PAPERSTACKCONFIG']
+            else:
+                config_path = '~/.paperstack.cfg'
 
         self.config_file = File(config_path)
         self.config_file.ensure()

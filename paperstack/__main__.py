@@ -22,6 +22,20 @@ def list_records(args):
         messenger.send_neutral(record)
 
 
+def filter_records(args):
+    config = Config(args.config_path)
+    messenger = Messenger(args.ansi)
+    library = Library(config, messenger)
+
+    messenger = Messenger(args.ansi)
+
+    filters = list(parse_dict(args.query).items())
+    records = library.filter(filters)
+
+    for record in records:
+        messenger.send_neutral(record)
+
+
 def add_record(args):
     config = Config(args.config_path)
     messenger = Messenger(args.ansi)
@@ -111,6 +125,18 @@ def main():
     )
     list_parser.set_defaults(func=list_records)
 
+    filter_parser = subparsers.add_parser(
+        'filter',
+        help = 'Filter and list library records.'
+    )
+    filter_parser.set_defaults(func=filter_records)
+
+    filter_parser.add_argument(
+        'query',
+        type = str,
+        help = 'Query to search columns (e.g., "author: cretiu; title: the way things").'
+    )
+
     get_parser = subparsers.add_parser(
         'get',
         help = 'Get a library record.'
@@ -121,42 +147,6 @@ def main():
         'id',
         type = str,
         help = 'Numerical record ID.'
-    )
-
-    add_parser = subparsers.add_parser(
-        'add',
-        help = 'Add a library record.'
-    )
-    add_parser.set_defaults(func=add_record)
-
-    add_parser.add_argument(
-        'type',
-        type = str,
-        help = 'Record type (article/book/website).'
-    )
-
-    add_parser.add_argument(
-        'entries',
-        type = str,
-        help = 'Entries relating to record type (e.g., "title: Life and Works; author: W. Roque and A. Mosenkov; year: 2020; journal: Astronomy and Computing").'
-    )
-
-    add_parser = subparsers.add_parser(
-        'add',
-        help = 'Add a library record.'
-    )
-    add_parser.set_defaults(func=add_record)
-
-    add_parser.add_argument(
-        'type',
-        type = str,
-        help = 'Record type (article/book/website).'
-    )
-
-    add_parser.add_argument(
-        'entries',
-        type = str,
-        help = 'Entries relating to record type (e.g., "title: Life and Works; author: W. Roque and A. Mosenkov; year: 2020; journal: Astronomy and Computing").'
     )
 
     add_parser = subparsers.add_parser(

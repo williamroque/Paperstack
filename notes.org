@@ -33,7 +33,7 @@
   - [X] Adding (raw)
   - [X] Editing (raw)
   - [X] Removing
-- [ ] Set up search
+- [X] Set up search
 - [ ] Set up scraping
 - [ ] Set up BibTeX export
 - [X] Start writing good documentation
@@ -47,3 +47,4 @@
 - [ ] Detect new files in directory, scrape and add
 - [ ] Batch import
 - [ ] Add installation guide and nice, user-friendly documentation
+- [ ] Add JSON output support for CLI

@@ -140,8 +140,7 @@ class Record:
                             type(self.record[field]).__name__
                         )
                     )
-
-                if pattern is not None and not re.match(pattern, self.record[field]):
+                elif pattern is not None and not re.match(pattern, self.record[field]):
                     self.messenger.send_error(
                         f'Invalid record. Field `{field}` does not match pattern `{pattern}`'
                     )

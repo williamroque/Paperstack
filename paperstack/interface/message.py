@@ -37,7 +37,8 @@ class Messenger:
 
     def send_error(self, message):
         """Send error message in accordance with the medium. Print by
-        default. Quit.
+        default. Make sure to interrupt somehow, either by quitting program
+        or raising exception.
 
         Paramaters
         ----------
@@ -50,6 +51,21 @@ class Messenger:
             print(f'Error: {message}')
 
         sys.exit(1)
+
+
+    def send_warning(self, message):
+        """Send warning message in accordance with the medium. Print by
+        default. Quit.
+
+        Paramaters
+        ----------
+        message : str
+        """
+
+        if self.ansi_colors:
+            print(f'\033[33mWarning:\033[0m {message}')
+        else:
+            print(f'Warning: {message}')
 
 
     def send_success(self, message):

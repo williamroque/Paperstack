@@ -1,8 +1,6 @@
 """Paperstack: A universal bibliography management tool"""
 
-
 import argparse
-import sys
 
 from paperstack.data.library import Library
 from paperstack.data.record import record_constructors
@@ -12,8 +10,8 @@ from paperstack.utility import parse_dict
 
 
 def list_records(args):
-    config = Config(args.config_path)
     messenger = Messenger(args.ansi)
+    config = Config(messenger, args.config_path)
     library = Library(config, messenger)
 
     records = library.filter([])
@@ -23,8 +21,8 @@ def list_records(args):
 
 
 def filter_records(args):
-    config = Config(args.config_path)
     messenger = Messenger(args.ansi)
+    config = Config(messenger, args.config_path)
     library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)
@@ -37,8 +35,8 @@ def filter_records(args):
 
 
 def add_record(args):
-    config = Config(args.config_path)
     messenger = Messenger(args.ansi)
+    config = Config(messenger, args.config_path)
     library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)
@@ -57,8 +55,8 @@ def add_record(args):
 
 
 def remove_record(args):
-    config = Config(args.config_path)
     messenger = Messenger(args.ansi)
+    config = Config(messenger, args.config_path)
     library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)
@@ -70,8 +68,8 @@ def remove_record(args):
 
 
 def update_record(args):
-    config = Config(args.config_path)
     messenger = Messenger(args.ansi)
+    config = Config(messenger, args.config_path)
     library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)
@@ -83,8 +81,8 @@ def update_record(args):
 
 
 def get_record(args):
-    config = Config(args.config_path)
     messenger = Messenger(args.ansi)
+    config = Config(messenger, args.config_path)
     library = Library(config, messenger)
 
     messenger = Messenger(args.ansi)

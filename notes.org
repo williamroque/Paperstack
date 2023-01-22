@@ -24,7 +24,7 @@
 - Show only a few special columns in table
   - When searching, show and highlight columns being searched
 
-* Roadmap
+* Roadmap [33%]
 
 - [X] Set up argparse
 - [X] Set up config file

@@ -177,6 +177,10 @@ class Library:
         ----------
         filters : list
             Each filter is a tuple with (field, query).
+
+        Returns
+        -------
+        list
         """
 
         try:

@@ -22,15 +22,20 @@ class Config:
 
     Parameters
     ----------
+    messenger : paperstack.interface.message.Messenger
     config_path : str, optional
         Path to config file. If not specified, will look in home directory.
 
     Attributes
     ----------
-    config_path : str
+    messenger : paperstack.interface.message.Messenger
+    config_file : paperstack.filesystem.file.File
+    config : configparser.ConfigParser
     """
 
-    def __init__(self, config_path=None):
+    def __init__(self, messenger, config_path=None):
+        self.messenger = messenger
+
         if config_path is None:
             if 'PAPERSTACKCONFIG' in os.environ:
                 config_path = os.environ['PAPERSTACKCONFIG']
@@ -42,7 +47,11 @@ class Config:
 
         self.config = configparser.ConfigParser()
         self.config.read_dict(DEFAULT_CONFIG)
-        self.config.read(self.config_file.path)
+
+        try:
+            self.config.read(self.config_file.path)
+        except configparser.Error:
+            self.messenger.send_warning('Damaged config file.')
 
 
     def get(self, section, key):

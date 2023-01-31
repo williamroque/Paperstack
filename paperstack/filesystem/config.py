@@ -16,6 +16,9 @@ DEFAULT_CONFIG = {
     'ads': {
         'key': 'l7lKrQ3g5toyrMyeLn9OlSiEgOZZO2Z8oZWlfZL6',
         'timeout': 10
+    },
+    'arxiv': {
+        'timeout': 10
     }
 }
 

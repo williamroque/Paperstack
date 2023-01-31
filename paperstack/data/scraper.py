@@ -1,11 +1,16 @@
 "Module in charge of web scraping."
 
-import requests
 from urllib.parse import quote_plus
+from xml.etree import ElementTree
+
+from datetime import datetime
+
+import requests
 
 import bibtexparser
 
 from paperstack.data.record import record_constructors
+from paperstack.filesystem.file import File
 
 
 class Scraper:
@@ -16,7 +21,6 @@ class Scraper:
     ----------
     record : dict
         Keep track of scraped information.
-    record_type : str
     config : paperstack.filesystem.config.Config
     messenger : paperstack.interface.message.Messenger
 
@@ -24,12 +28,15 @@ class Scraper:
     ----------
     record : dict
         Keep track of scraped information.
+    pdf_url : str
+        Keep track of PDF download url after scraping.
     config : paperstack.filesystem.config.Config
     messenger : paperstack.interface.message.Messenger
     """
 
     def __init__(self, record, config, messenger):
         self.record = record
+        self.pdf_url = None
 
         self.config = config
         self.messenger = messenger
@@ -39,6 +46,18 @@ class Scraper:
         """Use select `self.record` entries (e.g., DOI; will throw error if
         they are not present) to get more data. Populate `self.record` with
         scraped data.
+        """
+
+        raise NotImplementedError
+
+
+    def download_pdf(self, save_path):
+        """Download PDF from database using scraped `pdf_url` and save to
+        specified path.
+
+        Parameters
+        ----------
+        save_path : str
         """
 
         raise NotImplementedError
@@ -62,11 +81,23 @@ class Scraper:
         if record_type not in record_constructors:
             self.messenger.send_error('Invalid record type.')
 
-        return record_constructors[record_type](
+        record = record_constructors[record_type](
             self.record,
             self.config,
             self.messenger
         )
+
+        data_path = File(self.config.get('paths', 'data'), True)
+        save_path = data_path.join(
+            '{}.pdf'.format(record.record['record_id'])
+        )
+
+        self.download_pdf(save_path)
+
+        if 'path' in self.record and self.record['path']:
+            record.record['path'] = self.record['path']
+
+        return record
 
 
     def populate_record(self, record):
@@ -195,6 +226,110 @@ class ADSScraper(Scraper):
         self.record = record
 
 
+class ArXivScraper(Scraper):
+    """Scraper for the arXiv database.
+    """
+
+    def scrape(self):
+        if 'arxiv' in self.record:
+            arxiv = self.record['arxiv']
+            identifier = f'id:{arxiv}'
+        elif 'title' in self.record:
+            title = self.record['title']
+            identifier = f'ti:{title}'
+        else:
+            self.messenger.send_error('ArXiv ID or title is needed to scrape with arXiv.')
+
+        identifier = quote_plus(identifier)
+        url = f'http://export.arxiv.org/api/query?search_query={identifier}&start=0&max_results=1'
+
+        try:
+            response = requests.get(
+                url,
+                timeout = float(self.config.get('arxiv', 'timeout')),
+                headers = {'Content-Type': 'application/json'}
+            )
+        except requests.ConnectionError:
+            self.messenger.send_error('Having trouble connecting to arXiv.')
+        except requests.Timeout:
+            self.messenger.send_error('Request timed out while connecting to arXiv.')
+
+        tree = ElementTree.fromstring(response.content)
+        entry = tree[-1]
+
+        abstract = entry.find('{http://www.w3.org/2005/Atom}summary').text
+        abstract = abstract.strip().replace('\n', ' ').replace('  ', '')
+
+        title = entry.find('{http://www.w3.org/2005/Atom}title').text
+        title = title.strip().replace('\n', ' ').replace('  ', '')
+
+        doi = entry.find('{http://arxiv.org/schemas/atom}doi').text.strip()
+
+        date = entry.find('{http://www.w3.org/2005/Atom}published').text.strip()
+        date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
+
+        comment_tag = entry.find('{http://arxiv.org/schemas/atom}comment')
+        comment = None
+
+        if comment_tag is not None:
+            comment = comment_tag.text.strip().replace('\n', ' ').replace('  ', '')
+
+        authors = []
+
+        for author in entry.findall('{http://www.w3.org/2005/Atom}author'):
+            authors.append(
+                author.find('{http://www.w3.org/2005/Atom}name').text
+            )
+
+        authors = ' and '.join(authors)
+
+        for child in entry:
+            if 'title' in child.attrib and child.attrib['title'] == 'pdf':
+                if 'href' in child.attrib:
+                    self.pdf_url = child.attrib['href']
+                    break
+
+        record = {
+            'record_type': 'article',
+            'author': authors,
+            'title': title,
+            'journal': 'arXiv',
+            'year': str(date.year),
+            'month': str(date.month),
+            'doi': doi
+        }
+
+        if comment is not None:
+            record['bibnote'] = comment
+
+        self.record = record
+
+
+    def download_pdf(self, save_path):
+        if not self.pdf_url:
+            self.messenger.send_warning('Could not download PDF.')
+            return
+
+        try:
+            response = requests.get(
+                self.pdf_url,
+                timeout = float(self.config.get('arxiv', 'timeout')),
+            )
+        except requests.ConnectionError:
+            self.messenger.send_error('Having trouble connecting to arXiv.')
+        except requests.Timeout:
+            self.messenger.send_error('Request timed out while connecting to arXiv.')
+
+        try:
+            with open(save_path, 'wb') as f:
+                f.write(response.content)
+        except:
+            self.messenger.send_error('Could not write PDF to data directory.')
+
+        self.record['path'] = str(save_path)
+
+
 scraper_constructors = {
-    'ads': ADSScraper
+    'ads': ADSScraper,
+    'arxiv': ArXivScraper
 }

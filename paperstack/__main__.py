@@ -1,6 +1,7 @@
 """Paperstack: A universal bibliography management tool"""
 
 import argparse
+import subprocess, os, platform
 
 from paperstack.data.library import Library
 from paperstack.data.record import record_constructors
@@ -18,7 +19,11 @@ def list_records(args):
     records = library.filter([])
 
     for record in records:
-        messenger.send_neutral(record)
+        if args.field:
+            if args.field in record.record and record.record[args.field]:
+                messenger.send_neutral(record.record[args.field])
+        else:
+            messenger.send_neutral(record)
 
 
 def filter_records(args):
@@ -99,6 +104,28 @@ def get_record(args):
         messenger.send_neutral(record)
 
 
+def open_record(args):
+    messenger = Messenger(args.ansi)
+    config = Config(messenger, args.config_path)
+    library = Library(config, messenger)
+
+    messenger = Messenger(args.ansi)
+
+    record = library.get(args.id)
+
+    if not 'path' in record.record:
+        messenger.send_error(f'No path specified in record.')
+
+    path = record.record['path']
+
+    if platform.system() == 'Darwin':
+        subprocess.call(('open', path))
+    elif platform.system() == 'Windows':
+        os.startfile(path)
+    else:
+        subprocess.call(('xdg-open', path))
+
+
 def scrape(args):
     messenger = Messenger(args.ansi)
     config = Config(messenger, args.config_path)
@@ -159,6 +186,13 @@ def main():
     )
     list_parser.set_defaults(func=list_records)
 
+    list_parser.add_argument(
+        '--field',
+        type = str,
+        help = 'The specific field to get (optional).',
+        default = None
+    )
+
     filter_parser = subparsers.add_parser(
         'filter',
         help = 'Filter and list library records.'
@@ -188,6 +222,18 @@ def main():
         type = str,
         help = 'The specific field to get (optional).',
         default = None
+    )
+
+    open_parser = subparsers.add_parser(
+        'open',
+        help = 'Open library record PDF if it exists.'
+    )
+    open_parser.set_defaults(func=open_record)
+
+    open_parser.add_argument(
+        'id',
+        type = str,
+        help = 'Record ID.'
     )
 
     add_parser = subparsers.add_parser(

@@ -24,7 +24,7 @@
 - Show only a few special columns in table
   - When searching, show and highlight columns being searched
 
-* Roadmap [33%]
+* Roadmap [44%]
 
 - [X] Set up argparse
 - [X] Set up config file
@@ -34,8 +34,8 @@
   - [X] Editing (raw)
   - [X] Removing
 - [X] Set up search
-- [ ] Set up scraping
-- [ ] Set up BibTeX export
+- [X] Set up scraping
+- [X] Set up BibTeX export
 - [X] Start writing good documentation
 - [ ] Set up UI
 - [ ] Add table and preview

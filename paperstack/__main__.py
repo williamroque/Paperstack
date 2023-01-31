@@ -166,6 +166,30 @@ def scrape(args):
         messenger.send_neutral(record)
 
 
+def export_record(args):
+    messenger = Messenger(args.ansi)
+    config = Config(messenger, args.config_path)
+    library = Library(config, messenger)
+
+    messenger = Messenger(args.ansi)
+
+    ids = args.ids
+
+    for record_id in ids.split(','):
+        record_id = record_id.strip()
+        record = library.get(record_id)
+
+        options = {'bibtex': record.to_bibtex}
+        option_names = ', '.join(options.keys())
+
+        if not args.option in options:
+            messenger.send_error(f'Export option needs to be one of: {option_names}.')
+
+        option = options[args.option]
+
+        messenger.send_neutral(option())
+
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -324,6 +348,24 @@ def main():
         help = 'Do not add scraped reecord to the database.',
         dest = 'add',
         action = 'store_false'
+    )
+
+    export_parser = subparsers.add_parser(
+        'export',
+        help = 'Export a library record.'
+    )
+    export_parser.set_defaults(func=export_record)
+
+    export_parser.add_argument(
+        'option',
+        type = str,
+        help = 'The export option (bibtex/html).'
+    )
+
+    export_parser.add_argument(
+        'ids',
+        type = str,
+        help = 'Record IDs (comma separated).'
     )
 
     args = parser.parse_args()

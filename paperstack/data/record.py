@@ -2,7 +2,9 @@
 
 import re
 import os
-import sys
+
+import bibtexparser
+from bibtexparser.bibdatabase import BibDatabase
 
 from paperstack.data.constants import COLUMNS
 from paperstack.filesystem.file import File
@@ -245,6 +247,12 @@ class Record:
         return f'INSERT INTO library ({fields}) VALUES ({values})'
 
 
+    def to_bibtex(self):
+        "Export to BibTeX."
+
+        raise NotImplementedError
+
+
     def download_pdf(self, scraper):
         """Download PDF from database using scraper.
 
@@ -299,6 +307,37 @@ class Article(Record):
         self.add_requirement('note', str, False)
         self.add_requirement('path', str, False)
         self.add_requirement('tags', str, False)
+
+
+    def to_bibtex(self):
+        database = BibDatabase()
+
+        entries = [
+            ('record_id', 'ID'),
+            ('author', 'author'),
+            ('title', 'title'),
+            ('journal', 'journal'),
+            ('year', 'year'),
+            ('abstract', 'abstract'),
+            ('volume', 'volume'),
+            ('number', 'number'),
+            ('pages', 'pages'),
+            ('month', 'month'),
+            ('doi', 'doi'),
+            ('bibnote', 'comment'),
+        ]
+
+        bibtex_entries = {
+            'ENTRYTYPE': 'article'
+        }
+
+        for record_key, bibtex_key in entries:
+            if record_key in self.record and self.record[record_key]:
+                bibtex_entries[bibtex_key] = str(self.record[record_key])
+
+        database.entries = [bibtex_entries]
+
+        return bibtexparser.dumps(database)
 
 
 record_constructors = {

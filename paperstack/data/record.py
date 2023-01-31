@@ -5,6 +5,7 @@ import os
 import sys
 
 from paperstack.data.constants import COLUMNS
+from paperstack.filesystem.file import File
 
 
 class Record:
@@ -242,6 +243,25 @@ class Record:
         )
 
         return f'INSERT INTO library ({fields}) VALUES ({values})'
+
+
+    def download_pdf(self, scraper):
+        """Download PDF from database using scraper.
+
+        Parameters
+        ----------
+        scraper : paperstack.data.scraper.Scraper
+        """
+
+        data_path = File(self.config.get('paths', 'data'), True)
+        save_path = data_path.join(
+            '{}.pdf'.format(self.record['record_id'])
+        )
+
+        scraper.download_pdf(save_path)
+
+        if 'path' in scraper.record and scraper.record['path']:
+            self.record['path'] = scraper.record['path']
 
 
 class Article(Record):

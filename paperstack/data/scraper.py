@@ -10,7 +10,6 @@ import requests
 import bibtexparser
 
 from paperstack.data.record import record_constructors
-from paperstack.filesystem.file import File
 
 
 class Scraper:
@@ -81,23 +80,11 @@ class Scraper:
         if record_type not in record_constructors:
             self.messenger.send_error('Invalid record type.')
 
-        record = record_constructors[record_type](
+        return record_constructors[record_type](
             self.record,
             self.config,
             self.messenger
         )
-
-        data_path = File(self.config.get('paths', 'data'), True)
-        save_path = data_path.join(
-            '{}.pdf'.format(record.record['record_id'])
-        )
-
-        self.download_pdf(save_path)
-
-        if 'path' in self.record and self.record['path']:
-            record.record['path'] = self.record['path']
-
-        return record
 
 
     def populate_record(self, record):
@@ -181,6 +168,10 @@ class ADSScraper(Scraper):
         metadata = self.get_metadata()
         identifier = {'bibcode': [metadata['bibcode']]}
 
+        self.pdf_url = 'https://ui.adsabs.harvard.edu/link_gateway/{}/'.format(
+            metadata['bibcode']
+        )
+
         try:
             response = requests.post(
                 'https://api.adsabs.harvard.edu/v1/export/bibtex',
@@ -224,6 +215,50 @@ class ADSScraper(Scraper):
             record['abstract'] = metadata['abstract']
 
         self.record = record
+
+
+    def attempt_get(self, url):
+        """Attempt to get URL.
+
+        Parameters
+        ----------
+        url : str
+        """
+
+        try:
+            response = requests.get(
+                url,
+                timeout = float(self.config.get('ads', 'timeout')),
+            )
+        except requests.ConnectionError:
+            self.messenger.send_warning('Having trouble connecting to ADS.')
+        except requests.Timeout:
+            self.messenger.send_warning('Request timed out while connecting to ADS.')
+
+        return response
+
+
+    def download_pdf(self, save_path):
+        if not self.pdf_url:
+            self.messenger.send_warning('Not enough information to download PDF.')
+            return
+
+        response = self.attempt_get(self.pdf_url + 'PUB_PDF')
+
+        if not response or not response.ok:
+            response = self.attempt_get(self.pdf_url + 'EPRINT_PDF')
+
+        if not response or not response.ok:
+            return
+
+        try:
+            with open(save_path, 'wb') as f:
+                f.write(response.content)
+        except:
+            self.messenger.send_warning('Could not write PDF to data directory.')
+            return
+
+        self.record['path'] = str(save_path)
 
 
 class ArXivScraper(Scraper):
@@ -316,15 +351,18 @@ class ArXivScraper(Scraper):
                 timeout = float(self.config.get('arxiv', 'timeout')),
             )
         except requests.ConnectionError:
-            self.messenger.send_error('Having trouble connecting to arXiv.')
+            self.messenger.send_warning('Having trouble connecting to arXiv.')
+            return
         except requests.Timeout:
-            self.messenger.send_error('Request timed out while connecting to arXiv.')
+            self.messenger.send_warning('Request timed out while connecting to arXiv.')
+            return
 
         try:
             with open(save_path, 'wb') as f:
                 f.write(response.content)
         except:
-            self.messenger.send_error('Could not write PDF to data directory.')
+            self.messenger.send_warning('Could not write PDF to data directory.')
+            return
 
         self.record['path'] = str(save_path)
 

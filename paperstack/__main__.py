@@ -1,7 +1,9 @@
 """Paperstack: A universal bibliography management tool"""
 
 import argparse
-import subprocess, os, platform
+import subprocess
+import os
+import platform
 
 from paperstack.data.library import Library
 from paperstack.data.record import record_constructors
@@ -67,6 +69,11 @@ def remove_record(args):
 
     messenger = Messenger(args.ansi)
 
+    record = library.get(args.id)
+
+    if 'path' in record.record and record.record['path']:
+        os.remove(record.record['path'])
+
     library.remove(args.id)
     library.commit()
 
@@ -113,7 +120,7 @@ def open_record(args):
 
     record = library.get(args.id)
 
-    if not 'path' in record.record:
+    if not 'path' in record.record or not record.record['path']:
         messenger.send_error(f'No path specified in record.')
 
     path = record.record['path']
@@ -145,14 +152,18 @@ def scrape(args):
 
     record = scraper.create_record()
 
-    messenger.send_neutral(record)
-
     if args.add:
+        record.download_pdf(scraper)
+
         library = Library(config, messenger)
         library.add(record)
         library.commit()
 
+        messenger.send_neutral(record)
+
         messenger.send_success('Added item.')
+    else:
+        messenger.send_neutral(record)
 
 
 def main():

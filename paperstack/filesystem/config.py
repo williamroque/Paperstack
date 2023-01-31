@@ -12,6 +12,10 @@ DEFAULT_CONFIG = {
     },
     'article': {
         'id-format': 'author#2-title#10-year#4'
+    },
+    'ads': {
+        'key': 'l7lKrQ3g5toyrMyeLn9OlSiEgOZZO2Z8oZWlfZL6',
+        'timeout': 10
     }
 }
 

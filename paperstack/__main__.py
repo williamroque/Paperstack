@@ -4,6 +4,7 @@ import argparse
 
 from paperstack.data.library import Library
 from paperstack.data.record import record_constructors
+from paperstack.data.scraper import scraper_constructors
 from paperstack.filesystem.config import Config
 from paperstack.interface.message import Messenger
 from paperstack.utility import parse_dict
@@ -88,6 +89,28 @@ def get_record(args):
     messenger = Messenger(args.ansi)
 
     record = library.get(args.id)
+
+    messenger.send_neutral(record)
+
+
+def scrape(args):
+    messenger = Messenger(args.ansi)
+    config = Config(messenger, args.config_path)
+
+    messenger = Messenger(args.ansi)
+
+    if args.database not in scraper_constructors:
+        messenger.send_error('Invalid database name.')
+
+    constructor = scraper_constructors[args.database]
+
+    scraper = constructor(
+        parse_dict(args.entries),
+        config,
+        messenger
+    )
+
+    record = scraper.create_record()
 
     messenger.send_neutral(record)
 
@@ -193,6 +216,24 @@ def main():
         'entries',
         type = str,
         help = 'Entries to update (e.g., "author: Will Roque; year: 2021").'
+    )
+
+    scrape_parser = subparsers.add_parser(
+        'scrape',
+        help = 'Scrape a database.'
+    )
+    scrape_parser.set_defaults(func=scrape)
+
+    scrape_parser.add_argument(
+        'database',
+        type = str,
+        help = 'Which database to scrape from (ads/arxiv).'
+    )
+
+    scrape_parser.add_argument(
+        'entries',
+        type = str,
+        help = 'Entries used to find record (e.g., "bibcode: 2015RaSc...50..916A").'
     )
 
     args = parser.parse_args()

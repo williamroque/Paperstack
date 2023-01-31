@@ -5,6 +5,7 @@ COLUMNS = (
     ('organization', 'TEXT'),
     ('title', 'TEXT'),
     ('journal', 'TEXT'),
+    ('abstract', 'TEXT'),
     ('publisher', 'TEXT'),
     ('year', 'TEXT'),
     ('volume', 'TEXT'),

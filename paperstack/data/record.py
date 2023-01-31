@@ -77,8 +77,13 @@ class Record:
         return output
 
 
-    def tabulate_vertical(self):
+    def tabulate_vertical(self, column_width):
         """Represent the record as a vertical table.
+
+        Parameters
+        ----------
+        column_width : str
+            The maximum string width of the entries.
 
         Returns
         -------
@@ -88,15 +93,21 @@ class Record:
         keys = map(str, self.record.keys())
         values = map(str, self.record.values())
 
-        key_width = max(*map(len, keys))
-        value_width = max(*map(len, values))
+        key_width = min(max(*map(len, keys)), column_width + 5)
+        value_width = min(max(*map(len, values)), column_width + 5)
 
         output_lines = []
         
         for key, value in self.record.items():
             if value is not None:
-                key = key.center(key_width, ' ')
-                value = value.center(value_width, ' ')
+                if len(key) > column_width:
+                    key = key[:column_width].strip() + '[...]'
+
+                if len(value) > column_width:
+                    value = value[:column_width].strip() + '[...]'
+
+                key = key.ljust(key_width, ' ')
+                value = value.ljust(value_width, ' ')
 
                 output_lines.append(f'│ {key} │ {value} │')
 
@@ -116,8 +127,10 @@ class Record:
         output_lines = output.split('\n')
         output_width = max(*map(len, output_lines))
 
-        if output_width > os.get_terminal_size().columns:
-            output = self.tabulate_vertical()
+        terminal_width = os.get_terminal_size().columns
+
+        if output_width > terminal_width:
+            output = self.tabulate_vertical(terminal_width // 3)
 
         return output
 
@@ -253,6 +266,7 @@ class Article(Record):
         self.add_requirement('title', str, True)
         self.add_requirement('journal', str, True)
         self.add_requirement('year', str, True)
+        self.add_requirement('abstract', str, False)
         self.add_requirement('volume', str, False)
         self.add_requirement('number', str, False)
         self.add_requirement('pages', str, False)
@@ -260,6 +274,7 @@ class Article(Record):
         self.add_requirement('doi', str, False)
         self.add_requirement('issn', str, False)
         self.add_requirement('bibnote', str, False)
+        self.add_requirement('bibcode', str, False)
         self.add_requirement('note', str, False)
         self.add_requirement('path', str, False)
         self.add_requirement('tags', str, False)

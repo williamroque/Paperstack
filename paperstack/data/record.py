@@ -93,18 +93,18 @@ class Record:
         keys = map(str, self.record.keys())
         values = map(str, self.record.values())
 
-        key_width = min(max(*map(len, keys)), column_width + 5)
-        value_width = min(max(*map(len, values)), column_width + 5)
+        key_width = min(max(*map(len, keys)), column_width)
+        value_width = min(max(*map(len, values)), column_width)
 
         output_lines = []
         
         for key, value in self.record.items():
             if value is not None:
                 if len(key) > column_width:
-                    key = key[:column_width].strip() + '[...]'
+                    key = key[:column_width - 5].strip() + '[...]'
 
                 if len(value) > column_width:
-                    value = value[:column_width].strip() + '[...]'
+                    value = value[:column_width - 5].strip() + '[...]'
 
                 key = key.ljust(key_width, ' ')
                 value = value.ljust(value_width, ' ')
@@ -130,7 +130,8 @@ class Record:
         terminal_width = os.get_terminal_size().columns
 
         if output_width > terminal_width:
-            output = self.tabulate_vertical(terminal_width // 3)
+            column_width = terminal_width // 2 - 4 # account for box chars
+            output = self.tabulate_vertical(column_width)
 
         return output
 

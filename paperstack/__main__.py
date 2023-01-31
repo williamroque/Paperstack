@@ -90,7 +90,13 @@ def get_record(args):
 
     record = library.get(args.id)
 
-    messenger.send_neutral(record)
+    if args.field:
+        if not args.field in record.record:
+            messenger.send_error(f'No field `{args.field}` in record.')
+
+        messenger.send_neutral(record.record[args.field])
+    else:
+        messenger.send_neutral(record)
 
 
 def scrape(args):
@@ -113,6 +119,13 @@ def scrape(args):
     record = scraper.create_record()
 
     messenger.send_neutral(record)
+
+    if args.add:
+        library = Library(config, messenger)
+        library.add(record)
+        library.commit()
+
+        messenger.send_success('Added item.')
 
 
 def main():
@@ -168,6 +181,13 @@ def main():
         'id',
         type = str,
         help = 'Record ID.'
+    )
+
+    get_parser.add_argument(
+        '--field',
+        type = str,
+        help = 'The specific field to get (optional).',
+        default = None
     )
 
     add_parser = subparsers.add_parser(
@@ -234,6 +254,19 @@ def main():
         'entries',
         type = str,
         help = 'Entries used to find record (e.g., "bibcode: 2015RaSc...50..916A").'
+    )
+
+    scrape_parser.add_argument(
+        '--add',
+        help = 'Add scraped record to the database.',
+        default = False,
+        action = 'store_true'
+    )
+    scrape_parser.add_argument(
+        '--no-add',
+        help = 'Do not add scraped reecord to the database.',
+        dest = 'add',
+        action = 'store_false'
     )
 
     args = parser.parse_args()

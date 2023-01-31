@@ -90,6 +90,10 @@ class Library:
             self.messenger.send_error(
                 'Bad query. Make sure all columns exist.'
             )
+        except sqlite3.IntegrityError:
+            self.messenger.send_error(
+                'Bad query. Make sure record is unique.'
+            )
 
 
     def remove(self, record_id):

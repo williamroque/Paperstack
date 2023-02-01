@@ -298,7 +298,11 @@ class ArXivScraper(Scraper):
         title = entry.find('{http://www.w3.org/2005/Atom}title').text
         title = title.strip().replace('\n', ' ').replace('  ', '')
 
-        doi = entry.find('{http://arxiv.org/schemas/atom}doi').text.strip()
+        doi_element = entry.find('{http://arxiv.org/schemas/atom}doi')
+        doi = None
+
+        if doi_element:
+            doi = doi_element.text.strip()
 
         date = entry.find('{http://www.w3.org/2005/Atom}published').text.strip()
         date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')

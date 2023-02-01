@@ -1,0 +1,5 @@
+#!/usr/bin/env python3
+
+from paperstack.__main__ import main
+
+main()

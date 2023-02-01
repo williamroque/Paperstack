@@ -100,7 +100,7 @@ class Record:
         value_width = min(max(*map(len, values)), column_width)
 
         output_lines = []
-        
+
         for key, value in self.record.items():
             if value is not None:
                 if len(key) > column_width:
@@ -281,9 +281,6 @@ class Article(Record):
         The entries of the record."""
 
     RECORD_TYPE = 'article'
-
-    def __init__(self, record, config, messenger):
-        super().__init__(record, config, messenger)
 
 
     def setup(self):

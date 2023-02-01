@@ -1,0 +1,36 @@
+from setuptools import setup, find_packages
+
+
+def readme():
+    with open('README.rst') as f:
+        README = f.read()
+    return README
+
+
+setup(
+    name='Paperstack',
+    version='1.0.0',
+    description='A powerful, lightweight, universal bibliography management tool',
+    long_description=readme(),
+    long_description_content_type='text/x-rst',
+    url='https://github.com/williamroque/Paperstack',
+    author='William Roque',
+    author_email='william.aroque@gmail.com',
+    license='GPL',
+    classifiers=[
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Development Status :: 3 - Alpha',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Database',
+        'Topic :: Education',
+        'Topic :: Internet :: WWW/HTTP :: Indexing/Search',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Scientific/Engineering :: Astronomy',
+        'Topic :: Utilities'
+    ],
+    packages=find_packages(),
+    include_package_data=True,
+    install_requires=['requests', 'bibtexparser', 'urwid'],
+    scripts = ['bin/paperstack'],
+)

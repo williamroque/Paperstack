@@ -103,7 +103,7 @@ def get_record(args):
     record = library.get(args.id)
 
     if args.field:
-        if not args.field in record.record:
+        if not args.field in record.record or not record.record[args.field]:
             messenger.send_error(f'No field `{args.field}` in record.')
 
         messenger.send_neutral(record.record[args.field])

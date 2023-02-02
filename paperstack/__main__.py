@@ -375,13 +375,10 @@ def main():
     if 'func' in args:
         args.func(args)
     else:
-        messenger = AppMessenger(args.ansi)
-        config = Config(messenger, args.config_path)
+        app = App(args.config_path, args.ansi)
 
-        library = Library(config, messenger)
+        library = Library(app.config, app.messenger)
         records = library.filter([])
-
-        app = App()
 
         app.start(records)
 

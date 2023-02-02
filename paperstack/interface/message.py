@@ -26,7 +26,7 @@ class Messenger:
         """Send neutral message in accordance with the medium. Print by
         default.
 
-        Paramaters
+        Parameters
         ----------
         message : str
         """
@@ -39,7 +39,7 @@ class Messenger:
         default. Make sure to interrupt somehow, either by quitting program
         or raising exception.
 
-        Paramaters
+        Parameters
         ----------
         message : str
         """
@@ -56,7 +56,7 @@ class Messenger:
         """Send warning message in accordance with the medium. Print by
         default. Quit.
 
-        Paramaters
+        Parameters
         ----------
         message : str
         """
@@ -71,7 +71,7 @@ class Messenger:
         """Send success message in accordance with the medium. Print by
         default.
 
-        Paramaters
+        Parameters
         ----------
         message : str
         """
@@ -111,7 +111,7 @@ class AppMessenger:
         """Send neutral message in accordance with the medium. Print by
         default.
 
-        Paramaters
+        Parameters
         ----------
         message : str
         """
@@ -125,7 +125,7 @@ class AppMessenger:
         default. Make sure to interrupt somehow, either by quitting program
         or raising exception.
 
-        Paramaters
+        Parameters
         ----------
         message : str
         """
@@ -142,7 +142,7 @@ class AppMessenger:
         """Send warning message in accordance with the medium. Print by
         default. Quit.
 
-        Paramaters
+        Parameters
         ----------
         message : str
         """
@@ -157,7 +157,7 @@ class AppMessenger:
         """Send success message in accordance with the medium. Print by
         default.
 
-        Paramaters
+        Parameters
         ----------
         message : str
         """

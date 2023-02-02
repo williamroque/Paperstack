@@ -4,6 +4,10 @@ import re
 
 import urwid as u
 
+from paperstack.interface.keymap import Keymap
+from paperstack.interface.message import AppMessenger
+from paperstack.filesystem.config import Config
+
 
 def clean_text(text):
     """Clean text from BibTeX entry.
@@ -72,13 +76,15 @@ class RecordElement(u.WidgetWrap):
     record : paperstack.data.record.Record
     width : int
         Panel width.
+    keymap : paperstack.interface.keymap.Keymap
 
     Attributes
     ----------
     record : paperstack.data.record.Record
+    keymap : paperstack.interface.keymap.Keymap
     """
 
-    def __init__ (self, record, width):
+    def __init__ (self, record, width, keymap):
         self.content = record
 
         title = clean_text(record.record['title'])
@@ -89,13 +95,15 @@ class RecordElement(u.WidgetWrap):
             'record_selected'
         )
 
-        u.WidgetWrap.__init__(self, u.Padding(self.text, 'center', width - 1))
+        self.keymap = keymap
+
+        super().__init__(u.Padding(self.text, 'center', width - 1))
 
 
     def keypress(self, size, key):
         "Handle keypresses."
 
-        return key
+        self.keymap.trigger(key)
 
 
     def selectable(self):
@@ -111,10 +119,13 @@ class EntryElement(u.WidgetWrap):
     value : any
     width : int
         Panel width.
+    keymap : paperstack.interface.keymap.Keymap
     """
 
-    def __init__ (self, name, value, width):
+    def __init__ (self, name, value, width, keymap):
         self.content = value
+
+        self.keymap = keymap
 
         text = clean_text(value)
 
@@ -134,7 +145,7 @@ class EntryElement(u.WidgetWrap):
     def keypress(self, size, key):
         "Handle keypresses."
 
-        return key
+        self.keymap.trigger(key)
 
 
     def selectable(self):
@@ -168,19 +179,35 @@ class ListView(u.WidgetWrap):
     ----------
     width : int
         Panel width.
+    messenger : paperstack.interface.message.AppMessenger
+    global_keymap : paperstack.interface.keymap.Keymap
+    vim_keys : bool
 
     Attributes
     ----------
     width : int
         Panel width.
+    messenger : paperstack.interface.message.AppMessenger
+    keymap : paperstack.interface.keymap.Keymap
     walker : urwid.SimpleFocusListWalker
         Walkers help reflect data onto UI elements.
     """
 
-    def __init__(self, width):
+    def __init__(self, width, messenger, global_keymap, vim_keys):
         self.width = width
+        self.messenger = messenger
+        self.keymap = Keymap(messenger, global_keymap)
 
-        u.register_signal(self.__class__, ['show_details'])
+        if vim_keys:
+            self.keymap.bind('l', 'Focus details', self.focus_details)
+            self.keymap.bind('j', 'Next', self.focus_next)
+            self.keymap.bind('k', 'Previous', self.focus_previous)
+        else:
+            self.keymap.bind('right', 'Focus details', self.focus_details)
+            self.keymap.bind('down', 'Next', self.focus_next)
+            self.keymap.bind('up', 'Previous', self.focus_previous)
+
+        u.register_signal(self.__class__, ['show_details', 'focus_details'])
 
         self.walker = u.SimpleFocusListWalker([])
 
@@ -191,20 +218,52 @@ class ListView(u.WidgetWrap):
     def modified(self):
         "When focus is modified, send signal."
 
-        focus_w, _ = self.walker.get_focus()
+        widget, _ = self.walker.get_focus()
 
-        u.emit_signal(self, 'show_details', focus_w.content)
+        u.emit_signal(self, 'show_details', widget.content)
+
+
+    def focus_details(self):
+        "Move focus to details panel."
+
+        u.emit_signal(self, 'focus_details')
+
+
+    def focus_previous(self):
+        "Move focus to previous record."
+
+        try:
+            self.walker.set_focus(
+                self.walker.prev_position(self.walker.get_focus()[1])
+            )
+        except IndexError:
+            pass
+
+
+    def focus_next(self):
+        "Move focus to next record."
+
+        try:
+            self.walker.set_focus(
+                self.walker.next_position(self.walker.get_focus()[1])
+            )
+        except IndexError:
+            pass
 
 
     def set_data(self, records):
         """Render list items for each record.
 
-        Paramaters
+        Parameters
         ----------
         records : list
         """
 
-        widgets = [RecordElement(record, self.width) for record in records]
+        widgets = [RecordElement(
+            record,
+            self.width,
+            self.keymap
+        ) for record in records]
 
         u.disconnect_signal(self.walker, 'modified', self.modified)
 
@@ -225,17 +284,33 @@ class DetailView(u.WidgetWrap):
     ----------
     width : int
         Panel width.
+    messenger : paperstack.interface.message.AppMessenger
+    global_keymap : paperstack.interface.keymap.Keymap
+    vim_keys : bool
 
     Attributes
     ----------
     width : int
         Panel width.
+    messenger : paperstack.interface.message.AppMessenger
+    keymap : paperstack.interface.keymap.Keymap
     """
 
-    def __init__(self, width):
+    def __init__(self, width, messenger, global_keymap, vim_keys):
         self.width = width
+        self.messenger = messenger
+        self.keymap = Keymap(messenger, global_keymap)
 
-        u.register_signal(self.__class__, ['select_entry'])
+        if vim_keys:
+            self.keymap.bind('h', 'Focus list', self.focus_list)
+            self.keymap.bind('j', 'Next', self.focus_next)
+            self.keymap.bind('k', 'Previous', self.focus_previous)
+        else:
+            self.keymap.bind('left', 'Focus list', self.focus_list)
+            self.keymap.bind('down', 'Next', self.focus_next)
+            self.keymap.bind('up', 'Previous', self.focus_previous)
+
+        u.register_signal(self.__class__, ['focus_list'])
 
         self.walker = u.SimpleFocusListWalker([])
 
@@ -246,9 +321,47 @@ class DetailView(u.WidgetWrap):
     def modified(self):
         "When focus is modified, send signal."
 
-        focus_w, _ = self.walker.get_focus()
+        widget, _ = self.walker.get_focus()
 
-        u.emit_signal(self, 'select_entry', focus_w.content)
+
+    def focus_list(self):
+        "Move focus to list panel."
+
+        u.emit_signal(self, 'focus_list')
+
+
+    def focus_previous(self):
+        "Move focus to previous record."
+
+        try:
+            while True:
+                previous_index = self.walker.prev_position(
+                    self.walker.get_focus()[1]
+                )
+
+                self.walker.set_focus(previous_index)
+
+                if self.walker.get_focus()[0].selectable():
+                    break
+        except IndexError:
+            pass
+
+
+    def focus_next(self):
+        "Move focus to next record."
+
+        try:
+            while True:
+                next_index = self.walker.next_position(
+                    self.walker.get_focus()[1]
+                )
+
+                self.walker.set_focus(next_index)
+
+                if self.walker.get_focus()[0].selectable():
+                    break
+        except IndexError:
+            pass
 
 
     def set_record(self, record):
@@ -273,7 +386,8 @@ class DetailView(u.WidgetWrap):
                 widgets.append(EntryElement(
                     name,
                     record.record[key],
-                    self.width
+                    self.width,
+                    self.keymap
                 ))
 
         u.disconnect_signal(self.walker, 'modified', self.modified)
@@ -291,7 +405,13 @@ class DetailView(u.WidgetWrap):
 class App:
     "The main app."
 
-    def __init__(self):
+    def __init__(self, config_path, ansi_colors=True):
+        self.messenger = AppMessenger(self, ansi_colors)
+        self.config = Config(self.messenger, config_path)
+        self.keymap = Keymap(self.messenger)
+
+        self.keymap.bind('q', 'Exit app', self.quit)
+
         self.palette = {
             ('bg', '', ''),
             ('record', '', ''),
@@ -313,12 +433,27 @@ class App:
         list_width = width * list_ratio // 100 - 2
         detail_width = width * detail_ratio // 100 - 2
 
-        self.list_view = ListView(list_width)
-        self.detail_view = DetailView(detail_width)
+        vim_keys = self.config.get('keys', 'vim-bindings') == 'yes'
+
+        self.list_view = ListView(
+            list_width,
+            self.messenger,
+            self.keymap,
+            vim_keys
+        )
+        self.detail_view = DetailView(
+            detail_width,
+            self.messenger,
+            self.keymap,
+            vim_keys
+        )
 
         u.connect_signal(self.list_view, 'show_details', self.show_details)
+        u.connect_signal(self.list_view, 'focus_details', self.focus_details)
 
-        self.footer_text = u.Text(' Q to exit')
+        u.connect_signal(self.detail_view, 'focus_list', self.focus_list)
+
+        self.footer_text = u.Text('')
         footer = u.AttrWrap(self.footer_text, 'footer')
 
         list_filler = u.Filler(
@@ -341,13 +476,13 @@ class App:
             title = 'Details'
         )
 
-        columns = u.Columns([
+        self.columns = u.Columns([
             ('weight', list_ratio, list_panel),
             ('weight', detail_ratio, detail_panel)
         ])
 
         frame = u.AttrMap(u.Frame(
-            body = columns,
+            body = self.columns,
             footer = footer
         ), 'bg')
 
@@ -356,6 +491,8 @@ class App:
             self.palette,
             unhandled_input = self.unhandled_input
         )
+
+        self.focus_list()
 
 
     def change_colors(self, entry, foreground, background):
@@ -382,6 +519,12 @@ class App:
         self.loop.screen.clear()
 
 
+    def quit(self):
+        "Quit app."
+
+        raise u.ExitMainLoop()
+
+
     def unhandled_input(self, key):
         """Take care of global key bindings.
 
@@ -390,8 +533,7 @@ class App:
         key : str
         """
 
-        if key in ('q',):
-            raise u.ExitMainLoop()
+        self.keymap.trigger(key)
 
 
     def show_details(self, record):
@@ -405,21 +547,24 @@ class App:
         self.detail_view.set_record(record)
 
 
-    def select_entry(self, entry):
-        """Select the current entry in details.
+    def focus_list(self):
+        "Move focus to list panel."
 
-        Parameters
-        ----------
-        entry : paperstack.interface.app.EntryElement
-        """
+        self.list_view.keymap.show_hints()
+        self.columns.set_focus(0)
 
-        pass
+
+    def focus_details(self):
+        "Move focus to details panel."
+
+        self.detail_view.keymap.show_hints()
+        self.columns.set_focus(1)
 
 
     def update_data(self, records):
         """Render list items for each record.
 
-        Paramaters
+        Parameters
         ----------
         records : list
         """

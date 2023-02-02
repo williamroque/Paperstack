@@ -427,11 +427,23 @@ class App:
         width = size[0] - 2
         height = size[1] - 2
 
-        list_ratio = 30
-        detail_ratio = 70
+        list_ratio = 40
+        detail_ratio = 100 - list_ratio
 
-        list_width = width * list_ratio // 100 - 2
-        detail_width = width * detail_ratio // 100 - 2
+        width_threshold = 70
+
+        if width < width_threshold:
+            list_width = width
+            detail_width = width
+
+            list_height = height * list_ratio // 100 - 2
+            detail_height = height * detail_ratio // 100 - 2
+        else:
+            list_width = width * list_ratio // 100 - 2
+            detail_width = width * detail_ratio // 100 - 2
+
+            list_height = height
+            detail_height = height
 
         vim_keys = self.config.get('keys', 'vim-bindings') == 'yes'
 
@@ -459,12 +471,12 @@ class App:
         list_filler = u.Filler(
             self.list_view,
             valign = 'top',
-            height = height
+            height = list_height
         )
         detail_filler = u.Filler(
             self.detail_view,
             valign = 'top',
-            height = height
+            height = detail_height
         )
 
         list_panel = u.LineBox(
@@ -476,10 +488,16 @@ class App:
             title = 'Details'
         )
 
-        self.columns = u.Columns([
-            ('weight', list_ratio, list_panel),
-            ('weight', detail_ratio, detail_panel)
-        ])
+        if width < width_threshold:
+            self.columns = u.Pile([
+                ('weight', list_ratio, list_panel),
+                ('weight', detail_ratio, detail_panel)
+            ])
+        else:
+            self.columns = u.Columns([
+                ('weight', list_ratio, list_panel),
+                ('weight', detail_ratio, detail_panel)
+            ])
 
         frame = u.AttrMap(u.Frame(
             body = self.columns,

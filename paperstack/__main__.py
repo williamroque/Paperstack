@@ -10,7 +10,9 @@ from paperstack.data.record import record_constructors
 from paperstack.data.scraper import scraper_constructors
 from paperstack.filesystem.config import Config
 from paperstack.interface.message import Messenger
+from paperstack.interface.message import AppMessenger
 from paperstack.utility import parse_dict
+from paperstack.interface.app import App
 
 
 def list_records(args):
@@ -373,7 +375,15 @@ def main():
     if 'func' in args:
         args.func(args)
     else:
-        print('Interface')
+        messenger = AppMessenger(args.ansi)
+        config = Config(messenger, args.config_path)
+
+        library = Library(config, messenger)
+        records = library.filter([])
+
+        app = App()
+
+        app.start(records)
 
 
 if __name__ == '__main__':

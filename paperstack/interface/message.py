@@ -4,7 +4,6 @@ import sys
 
 
 class Messenger:
-
     """Proudly deliver messages to the user in a timely manner. Children of
     this messenger will surpass it in talent and style.
 
@@ -81,3 +80,89 @@ class Messenger:
             print(f'\033[32mSuccess:\033[0m {message}')
         else:
             print(f'Success: {message}')
+
+
+class AppMessengerError(Exception):
+    "Exception raised whenever an error is sent using AppMessenger."
+
+
+class AppMessenger:
+    """Messenger for an App instance. Puts messages in the footer.
+
+    Parameters
+    ----------
+    app : paperstack.interface.app.App
+    ansi_colors : bool
+        If true, print with special colors using ANSI escape sequences.
+
+    Attributes
+    ----------
+    app : paperstack.interface.app.App
+    ansi_colors : bool
+        If true, print with special colors using ANSI escape sequences.
+    """
+
+    def __init__(self, app, ansi_colors=True):
+        self.app = app
+        self.ansi_colors = ansi_colors
+
+
+    def send_neutral(self, message):
+        """Send neutral message in accordance with the medium. Print by
+        default.
+
+        Paramaters
+        ----------
+        message : str
+        """
+
+        self.app.change_colors('footer', '', '')
+        self.app.footer_text.set_text(message)
+
+
+    def send_error(self, message):
+        """Send error message in accordance with the medium. Print by
+        default. Make sure to interrupt somehow, either by quitting program
+        or raising exception.
+
+        Paramaters
+        ----------
+        message : str
+        """
+
+        if self.ansi_colors:
+            self.app.change_colors('footer', 'dark red', '')
+
+        self.app.footer_text.set_text(f'Error: {message}')
+
+        raise AppMessengerError
+
+
+    def send_warning(self, message):
+        """Send warning message in accordance with the medium. Print by
+        default. Quit.
+
+        Paramaters
+        ----------
+        message : str
+        """
+
+        if self.ansi_colors:
+            self.app.change_colors('footer', 'dark yellow', '')
+
+        self.app.footer_text.set_text(f'Warning: {message}')
+
+
+    def send_success(self, message):
+        """Send success message in accordance with the medium. Print by
+        default.
+
+        Paramaters
+        ----------
+        message : str
+        """
+
+        if self.ansi_colors:
+            self.app.change_colors('footer', 'dark green', '')
+
+        self.app.footer_text.set_text(f'Success: {message}')

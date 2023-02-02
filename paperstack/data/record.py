@@ -146,7 +146,7 @@ class Record:
         """
 
         for requirement in self.requirements:
-            field, field_type, required, pattern = requirement
+            field, _, field_type, required, pattern = requirement
 
             if field in self.record and self.record[field] is not None:
                 if not isinstance(self.record[field], field_type):
@@ -167,13 +167,15 @@ class Record:
                 self.record[field] = None
 
 
-    def add_requirement(self, field, field_type, required=True, pattern=None):
+    def add_requirement(self, field, field_name, field_type, required=True, pattern=None):
         """Add a field requirement.
 
         Parameters
         ----------
         field : str
             Which field to add requirement to
+        field_name : str
+            Display name of field
         field_type : any
             Python type of field
         required : bool, optional
@@ -181,7 +183,7 @@ class Record:
         pattern : str, optional
             RegEx pattern for field if type is str"""
 
-        self.requirements.append((field, field_type, required, pattern))
+        self.requirements.append((field, field_name, field_type, required, pattern))
 
 
     def generate_id(self):
@@ -287,23 +289,23 @@ class Article(Record):
         if 'record_id' not in self.record or self.record['record_id'] is None:
             self.record['record_id'] = self.generate_id()
 
-        self.add_requirement('record_id', str, True)
-        self.add_requirement('author', str, True)
-        self.add_requirement('title', str, True)
-        self.add_requirement('journal', str, True)
-        self.add_requirement('year', str, True)
-        self.add_requirement('abstract', str, False)
-        self.add_requirement('volume', str, False)
-        self.add_requirement('number', str, False)
-        self.add_requirement('pages', str, False)
-        self.add_requirement('month', str, False)
-        self.add_requirement('doi', str, False)
-        self.add_requirement('issn', str, False)
-        self.add_requirement('bibnote', str, False)
-        self.add_requirement('bibcode', str, False)
-        self.add_requirement('note', str, False)
-        self.add_requirement('path', str, False)
-        self.add_requirement('tags', str, False)
+        self.add_requirement('author', 'Author', str, True)
+        self.add_requirement('title', 'Title', str, True)
+        self.add_requirement('tags', 'Tags', str, False)
+        self.add_requirement('journal', 'Journal', str, True)
+        self.add_requirement('year', 'Year', str, True)
+        self.add_requirement('abstract', 'Abstract', str, False)
+        self.add_requirement('volume', 'Volume', str, False)
+        self.add_requirement('number', 'Number', str, False)
+        self.add_requirement('pages', 'Pages', str, False)
+        self.add_requirement('month', 'Month', str, False)
+        self.add_requirement('doi', 'DOI', str, False)
+        self.add_requirement('issn', 'ISSN', str, False)
+        self.add_requirement('bibnote', 'Bibnote', str, False)
+        self.add_requirement('bibcode', 'Bibcode', str, False)
+        self.add_requirement('note', 'Note', str, False)
+        self.add_requirement('path', 'Path', str, False)
+        self.add_requirement('record_id', 'Record ID', str, True)
 
 
     def to_bibtex(self):

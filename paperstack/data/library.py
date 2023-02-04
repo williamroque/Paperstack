@@ -1,7 +1,6 @@
 """Provides Library database class."""
 
 import sqlite3
-from functools import partial
 
 from paperstack.filesystem.file import File
 from paperstack.data.constants import COLUMNS

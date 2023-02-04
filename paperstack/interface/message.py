@@ -91,7 +91,6 @@ class AppMessenger:
 
     Parameters
     ----------
-    app : paperstack.interface.app.App
     ansi_colors : bool
         If true, print with special colors using ANSI escape sequences.
 
@@ -102,9 +101,20 @@ class AppMessenger:
         If true, print with special colors using ANSI escape sequences.
     """
 
-    def __init__(self, app, ansi_colors=True):
-        self.app = app
+    def __init__(self, ansi_colors=True):
+        self.app = None
         self.ansi_colors = ansi_colors
+
+
+    def connect_app(self, app):
+        """Define the `App` instance the messenger will use.
+
+        Parameters
+        ----------
+        app : paperstack.interface.app.App
+        """
+
+        self.app = app
 
 
     def send_neutral(self, message):
@@ -116,8 +126,9 @@ class AppMessenger:
         message : str
         """
 
-        self.app.change_colors('footer', '', '')
-        self.app.footer_text.set_text(message)
+        if self.app is not None:
+            self.app.change_colors('footer', '', '')
+            self.app.footer_text.set_text(message)
 
 
     def send_error(self, message):
@@ -130,10 +141,13 @@ class AppMessenger:
         message : str
         """
 
-        if self.ansi_colors:
-            self.app.change_colors('footer', 'dark red', '')
+        if self.app is None:
+            print(f'Error: {message}')
+        else:
+            if self.ansi_colors:
+                self.app.change_colors('footer', 'dark red', '')
 
-        self.app.footer_text.set_text(f'Error: {message}')
+            self.app.footer_text.set_text(f'Error: {message}')
 
         raise AppMessengerError
 
@@ -147,10 +161,13 @@ class AppMessenger:
         message : str
         """
 
-        if self.ansi_colors:
-            self.app.change_colors('footer', 'dark yellow', '')
+        if self.app is None:
+            print(f'Warning: {message}')
+        else:
+            if self.ansi_colors:
+                self.app.change_colors('footer', 'dark yellow', '')
 
-        self.app.footer_text.set_text(f'Warning: {message}')
+            self.app.footer_text.set_text(f'Warning: {message}')
 
 
     def send_success(self, message):
@@ -162,7 +179,10 @@ class AppMessenger:
         message : str
         """
 
-        if self.ansi_colors:
-            self.app.change_colors('footer', 'dark green', '')
+        if self.app is None:
+            print(f'Success: {message}')
+        else:
+            if self.ansi_colors:
+                self.app.change_colors('footer', 'dark green', '')
 
-        self.app.footer_text.set_text(f'Success: {message}')
+            self.app.footer_text.set_text(f'Success: {message}')

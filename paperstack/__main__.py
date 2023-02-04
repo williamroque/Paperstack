@@ -375,12 +375,15 @@ def main():
     if 'func' in args:
         args.func(args)
     else:
-        app = App(args.config_path, args.ansi)
+        messenger = AppMessenger(args.ansi)
+        config = Config(messenger, args.config_path)
+        library = Library(config, messenger)
 
-        library = Library(app.config, app.messenger)
-        records = library.filter([])
+        app = App(config, messenger, library)
 
-        app.start(records)
+        messenger.connect_app(app)
+
+        app.start()
 
 
 if __name__ == '__main__':

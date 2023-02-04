@@ -1,6 +1,6 @@
 "A module for providing keymaps to the application interface."
 
-from copy import deepcopy
+from copy import copy
 
 
 class Keymap:
@@ -14,15 +14,21 @@ class Keymap:
     Attributes
     ----------
     messenger : paperstack.interface.message.AppMessenger
+    combo_keys : list
+    active_map : dict
+        Currently active keymap in a key combo or otherwise.
     """
 
     def __init__(self, messenger, inherit=None):
         self.messenger = messenger
 
         if inherit:
-            self.keymap = deepcopy(inherit.keymap)
+            self.keymap = copy(inherit.keymap)
         else:
             self.keymap = {}
+
+        self.combo_keys = []
+        self.active_map = self.keymap
 
 
     def bind(self, key, hint, callback):
@@ -34,9 +40,33 @@ class Keymap:
         hint : str
             Short description of binding.
         callback : func
+
         """
 
         self.keymap[key] = (hint, callback)
+
+
+    def bind_combo(self, keys, hints, callback):
+        """Create key binding.
+
+        Parameters
+        ----------
+        keys : list
+            List of keys for a combo.
+        hints : list
+            Short descriptions of binding for each key in combo.
+        callback : func
+
+        """
+
+        keymap = self.keymap
+
+        for i, key in enumerate(keys[:-1]):
+            if not key in keymap:
+                keymap[key] = { 'hint': hints[i] }
+            keymap = keymap[key]
+
+        keymap[keys[-1]] = (hints[-1], callback)
 
 
     def trigger(self, key):
@@ -45,20 +75,48 @@ class Keymap:
         Parameters
         ----------
         key : str
-
-        Returns
-        -------
-        bool
-            Whether key was in keymap.
         """
 
-        if key in self.keymap:
-            self.keymap[key][1]()
+        if key in self.active_map:
+            binding = self.active_map[key]
+
+            if isinstance(binding, dict):
+                self.active_map = binding
+                self.combo_keys.append(key)
+
+                self.show_hints()
+            else:
+                self.active_map = self.keymap
+                self.combo_keys = []
+                binding[1]()
+        else:
+            self.active_map = self.keymap
+            self.combo_keys = []
+
+            self.show_hints()
 
 
     def show_hints(self):
         "Show keymap hints."
 
-        self.messenger.send_neutral(
-            ' │ '.join(f'{key}: {hint}' for key, (hint, _) in self.keymap.items())
-        )
+        hints = []
+
+        for key, binding in self.active_map.items():
+            if key == 'hint':
+                continue
+
+            if isinstance(binding, dict):
+                hint = binding['hint']
+            else:
+                hint = binding[0]
+
+            hints.append(f'{key}: {hint}')
+
+        message = ''
+
+        if len(self.combo_keys) > 0:
+            message += ' '.join(self.combo_keys) + '- '
+
+        message += ' │ '.join(hints)
+
+        self.messenger.send_neutral(message)

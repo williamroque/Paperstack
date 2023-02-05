@@ -267,6 +267,13 @@ class App:
                     try:
                         record.setup()
                         record.validate()
+
+                        self.library.add(record)
+                        self.library.commit()
+
+                        self.update_data(
+                            self.library.filter([])
+                        )
                     except AppMessengerError:
                         pass
 

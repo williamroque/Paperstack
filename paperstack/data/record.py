@@ -22,30 +22,40 @@ class Record:
         The entries of the record.
     config : paperstack.filesystem.config.Config
     messenger : paperstack.interface.message.Messenger
+    delay_setup : bool
+        Whether to delay validation and setup in order to first build up
+        record.
 
     Attributes
     ----------
     RECORD_TYPE : {'article', 'book', 'website'}
         The type of record.
+    REQUIREMENTS : list
+        A list of requirement tuples.
     record : dict
         The entries of the record.
     config : paperstack.filesystem.config.Config
     messenger : paperstack.interface.message.Messenger
-    requirements : list
-        A list of requirement tuples.
     """
 
     RECORD_TYPE = None
+    REQUIREMENTS = []
 
-    def __init__(self, record, config, messenger):
+    def __init__(self, record, config, messenger, delay_setup=False):
         self.record = record
         self.config = config
         self.messenger = messenger
 
-        self.requirements = []
+        if not delay_setup:
+            self.setup()
+            self.validate()
 
-        self.setup()
-        self.validate()
+
+    @property
+    def requirements(self):
+        "Get record requirements."
+
+        return self.__class__.REQUIREMENTS
 
 
     def tabulate_horizontal(self):
@@ -148,10 +158,10 @@ class Record:
         for requirement in self.requirements:
             field, _, field_type, required, pattern = requirement
 
-            if field in self.record and self.record[field] is not None:
+            if field in self.record and self.record[field]:
                 if not isinstance(self.record[field], field_type):
                     self.messenger.send_error(
-                        'Invalid record. Expected type `{}` for field "{}", but instead got `{}`'.format(
+                        'Invalid record. Expected type `{}` for field "{}", but instead got `{}`.'.format(
                             field_type.__name__,
                             field,
                             type(self.record[field]).__name__
@@ -159,31 +169,12 @@ class Record:
                     )
                 elif pattern is not None and not re.match(pattern, self.record[field]):
                     self.messenger.send_error(
-                        f'Invalid record. Field `{field}` does not match pattern `{pattern}`'
+                        f'Invalid record. Field `{field}` does not match pattern `{pattern}`.'
                     )
             elif required:
-                self.messenger.send_error(f'Invalid record. Field `{field}` required')
+                self.messenger.send_error(f'Invalid record. Field `{field}` required.')
             else:
                 self.record[field] = None
-
-
-    def add_requirement(self, field, field_name, field_type, required=True, pattern=None):
-        """Add a field requirement.
-
-        Parameters
-        ----------
-        field : str
-            Which field to add requirement to
-        field_name : str
-            Display name of field
-        field_type : any
-            Python type of field
-        required : bool, optional
-            Whether field must exist
-        pattern : str, optional
-            RegEx pattern for field if type is str"""
-
-        self.requirements.append((field, field_name, field_type, required, pattern))
 
 
     def generate_id(self):
@@ -208,7 +199,7 @@ class Record:
             length = int(length)
 
             if field not in self.record:
-                self.messenger.send_error(f'Cannot create record ID with non-existent field {field}.')
+                self.messenger.send_error(f'Cannot create record ID with non-existent field `{field}`.')
 
             if field == 'author':
                 authors = self.record['author'].split(' and ')[:length]
@@ -226,9 +217,10 @@ class Record:
 
 
     def setup(self):
-        "Set up requirements according to record type."
+        "Set up record."
 
-        raise NotImplementedError
+        if 'record_id' not in self.record or self.record['record_id'] is None:
+            self.record['record_id'] = self.generate_id()
 
 
     def to_sql(self):
@@ -283,29 +275,25 @@ class Article(Record):
         The entries of the record."""
 
     RECORD_TYPE = 'article'
-
-
-    def setup(self):
-        if 'record_id' not in self.record or self.record['record_id'] is None:
-            self.record['record_id'] = self.generate_id()
-
-        self.add_requirement('author', 'Author', str, True)
-        self.add_requirement('title', 'Title', str, True)
-        self.add_requirement('tags', 'Tags', str, False)
-        self.add_requirement('journal', 'Journal', str, True)
-        self.add_requirement('year', 'Year', str, True)
-        self.add_requirement('abstract', 'Abstract', str, False)
-        self.add_requirement('volume', 'Volume', str, False)
-        self.add_requirement('number', 'Number', str, False)
-        self.add_requirement('pages', 'Pages', str, False)
-        self.add_requirement('month', 'Month', str, False)
-        self.add_requirement('doi', 'DOI', str, False)
-        self.add_requirement('issn', 'ISSN', str, False)
-        self.add_requirement('bibnote', 'Bibnote', str, False)
-        self.add_requirement('bibcode', 'Bibcode', str, False)
-        self.add_requirement('note', 'Note', str, False)
-        self.add_requirement('path', 'Path', str, False)
-        self.add_requirement('record_id', 'Record ID', str, True)
+    REQUIREMENTS = [
+        ('author', 'Author', str, True, None),
+        ('title', 'Title', str, True, None),
+        ('tags', 'Tags', str, False, None),
+        ('journal', 'Journal', str, True, None),
+        ('year', 'Year', str, True, None),
+        ('abstract', 'Abstract', str, False, None),
+        ('volume', 'Volume', str, False, None),
+        ('number', 'Number', str, False, None),
+        ('pages', 'Pages', str, False, None),
+        ('month', 'Month', str, False, None),
+        ('doi', 'DOI', str, False, None),
+        ('issn', 'ISSN', str, False, None),
+        ('bibnote', 'Bibnote', str, False, None),
+        ('bibcode', 'Bibcode', str, False, None),
+        ('note', 'Note', str, False, None),
+        ('path', 'Path', str, False, None),
+        ('record_id', 'Record ID', str, True, None)
+    ]
 
 
     def to_bibtex(self):

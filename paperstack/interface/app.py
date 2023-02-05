@@ -1,10 +1,12 @@
 "This is where the 'graphical' interface magic happens."
 
+from copy import copy
+
 import urwid as u
 
 from paperstack.interface.keymap import Keymap
-from paperstack.interface.message import AppMessenger
-from paperstack.filesystem.config import Config
+from paperstack.interface.message import AppMessengerError
+from paperstack.data.record import record_constructors
 
 from paperstack.interface.list import ListView
 from paperstack.interface.details import DetailView
@@ -20,6 +22,22 @@ class App:
         self.keymap = Keymap(self.messenger)
 
         self.keymap.bind('q', 'Exit app', self.quit)
+
+        self.keymap.bind_combo(
+            ['a', 'm', 'a'],
+            ['Add record', 'Manually', 'Article'],
+            lambda: self.add_manual('article')
+        )
+        self.keymap.bind_combo(
+            ['a', 's', 'a'],
+            ['Add record', 'Scrape', 'ADS'],
+            lambda: self.add_scraped('ads')
+        )
+        self.keymap.bind_combo(
+            ['a', 's', 'x'],
+            ['Add record', 'Scrape', 'ArXiV'],
+            lambda: self.add_scraped('arxiv')
+        )
 
         self.palette = {
             ('bg', '', ''),
@@ -75,8 +93,13 @@ class App:
 
         u.connect_signal(self.detail_view, 'focus_list', self.focus_list)
 
-        self.footer_text = u.Text('')
-        footer = u.AttrWrap(self.footer_text, 'footer')
+        u.register_signal(self.__class__, ['escape', 'enter'])
+
+        self.text_mode = True
+
+        footer_text = u.AttrWrap(u.Text(''), 'footer')
+
+        self.footer_container = u.WidgetPlaceholder(footer_text)
 
         list_filler = u.Filler(
             self.list_view,
@@ -109,15 +132,16 @@ class App:
                 ('weight', detail_ratio, detail_panel)
             ])
 
-        frame = u.AttrMap(u.Frame(
+        self.frame = u.Frame(
             body = self.columns,
-            footer = footer
-        ), 'bg')
+            footer = self.footer_container
+        )
 
         self.loop = u.MainLoop(
-            frame,
+            u.AttrMap(self.frame, 'bg'),
             self.palette,
-            unhandled_input = self.unhandled_input
+            unhandled_input = self.unhandled_input,
+            handle_mouse = False
         )
 
         self.focus_list()
@@ -161,7 +185,12 @@ class App:
         key : str
         """
 
-        self.keymap.trigger(key)
+        if key == 'enter':
+            u.emit_signal(self, 'enter', None)
+        elif key == 'esc':
+            u.emit_signal(self, 'escape', None)
+        elif self.text_mode:
+            self.keymap.trigger(key)
 
 
     def show_details(self, record):
@@ -178,6 +207,8 @@ class App:
     def focus_list(self):
         "Move focus to list panel."
 
+        self.frame.set_focus('body')
+
         self.list_view.keymap.show_hints()
         self.list_view.has_focus = True
         self.detail_view.has_focus = False
@@ -187,10 +218,85 @@ class App:
     def focus_details(self):
         "Move focus to details panel."
 
+        self.frame.set_focus('body')
+
         self.detail_view.keymap.show_hints()
         self.list_view.has_focus = False
         self.detail_view.has_focus = True
         self.columns.set_focus(1)
+
+
+    def focus_footer(self):
+        "Move focus to footer."
+
+        self.list_view.has_focus = False
+        self.detail_view.has_focus = True
+
+        self.frame.set_focus('footer')
+
+
+    def add_manual(self, record_type):
+        "Add record type manually."
+
+        try:
+            if record_type not in record_constructors:
+                self.messenger.send_error(f'Record type `{record_type}` does not exist.')
+
+            constructor = record_constructors[record_type]
+            record = constructor({}, self.config, self.messenger, True)
+
+            ignore_fields = ('record_id', 'path')
+
+            requirements = []
+
+            for requirement in copy(record.requirements):
+                if requirement[0] not in ignore_fields:
+                    requirements.append(requirement)
+
+            def callback(text, requirement):
+                record.record[requirement[0]] = text
+
+                if len(requirements) > 0:
+                    requirement = requirements.pop(0)
+                    self.messenger.ask_input(
+                        f'{requirement[1]}: ',
+                        callback,
+                        requirement
+                    )
+                else:
+                    try:
+                        record.setup()
+                        record.validate()
+                    except AppMessengerError:
+                        pass
+
+            requirement = requirements.pop(0)
+            self.messenger.ask_input(
+                f'{requirement[1]}: ',
+                callback,
+                requirement
+            )
+        except AppMessengerError:
+            pass
+
+
+    def add_scraped(self, record_type):
+        "Add record type manually."
+
+        try:
+            if record_type not in record_constructors:
+                self.messenger.send_error(f'Record type `{record_type}` does not exist.')
+
+            constructor = record_constructors[record_type]
+            record = constructor({}, self.config, self.messenger)
+
+            for requirement in record.requirements:
+                self.messenger.ask_input(
+                    f'{requirement[1]}: ',
+                    lambda: ()
+                )
+        except AppMessengerError:
+            pass
 
 
     def update_data(self, records):

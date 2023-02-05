@@ -85,6 +85,12 @@ class ListView(u.WidgetWrap):
         self.has_focus = False
         self.previous_widget = None
 
+        self.keymap.bind_combo(
+            ['d', 'y'],
+            ['Delete record', 'Confirm'],
+            self.remove_record
+        )
+
         if vim_keys:
             self.keymap.bind('l', 'Focus details', self.focus_details)
             self.keymap.bind('j', 'Next', self.focus_next)
@@ -93,12 +99,6 @@ class ListView(u.WidgetWrap):
             self.keymap.bind('right', 'Focus details', self.focus_details)
             self.keymap.bind('down', 'Next', self.focus_next)
             self.keymap.bind('up', 'Previous', self.focus_previous)
-
-        self.keymap.bind_combo(
-            ['d', 'y'],
-            ['Delete record', 'Confirm'],
-            self.remove_record
-        )
 
         u.register_signal(self.__class__, ['show_details', 'focus_details'])
 

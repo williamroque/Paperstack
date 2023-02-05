@@ -2,6 +2,8 @@
 
 import sys
 
+import urwid as u
+
 
 class Messenger:
     """Proudly deliver messages to the user in a timely manner. Children of
@@ -128,7 +130,17 @@ class AppMessenger:
 
         if self.app is not None:
             self.app.change_colors('footer', '', '')
-            self.app.footer_text.set_text(message)
+
+            if self.app.text_mode:
+                self.app.footer_container.original_widget.set_text(
+                    str(message)
+                )
+            else:
+                self.app.footer_container.original_widget = u.AttrWrap(
+                    u.Text(str(message)),
+                    'footer'
+                )
+                self.app.text_mode = True
 
 
     def send_error(self, message):
@@ -147,7 +159,17 @@ class AppMessenger:
             if self.ansi_colors:
                 self.app.change_colors('footer', 'dark red', '')
 
-            self.app.footer_text.set_text(f'Error: {message}')
+
+            if self.app.text_mode:
+                self.app.footer_container.original_widget.set_text(
+                    f'Error: {message}'
+                )
+            else:
+                self.app.footer_container.original_widget = u.AttrWrap(
+                    u.Text(f'Error: {message}'),
+                    'footer'
+                )
+                self.app.text_mode = True
 
         raise AppMessengerError
 
@@ -167,7 +189,17 @@ class AppMessenger:
             if self.ansi_colors:
                 self.app.change_colors('footer', 'dark yellow', '')
 
-            self.app.footer_text.set_text(f'Warning: {message}')
+
+            if self.app.text_mode:
+                self.app.footer_container.original_widget.set_text(
+                    f'Warning: {message}'
+                )
+            else:
+                self.app.footer_container.original_widget = u.AttrWrap(
+                    u.Text(f'Warning: {message}'),
+                    'footer'
+                )
+                self.app.text_mode = True
 
 
     def send_success(self, message):
@@ -185,4 +217,55 @@ class AppMessenger:
             if self.ansi_colors:
                 self.app.change_colors('footer', 'dark green', '')
 
-            self.app.footer_text.set_text(f'Success: {message}')
+
+            if self.app.text_mode:
+                self.app.footer_container.original_widget.set_text(
+                    f'Success: {message}'
+                )
+            else:
+                self.app.footer_container.original_widget = u.AttrWrap(
+                    u.Text(f'Success: {message}'),
+                    'footer'
+                )
+                self.app.text_mode = True
+
+
+    def ask_input(self, prompt, callback, *callback_args):
+        """Ask for input using footer with `prompt`, then call `callback`
+        with results.
+
+        Parameters
+        ----------
+        prompt : str
+        callback : func
+        callback_args : list
+        """
+
+        if self.app is None:
+            raise AppMessengerError
+
+        editor = u.Edit(prompt)
+
+        def escape(_):
+            self.app.focus_list()
+            self.app.list_view.keymap.show_hints()
+
+            u.disconnect_signal(self.app, 'escape', escape)
+
+        u.connect_signal(self.app, 'escape', escape)
+
+        def enter(_):
+            text = editor.get_edit_text()
+
+            self.app.focus_list()
+            self.app.list_view.keymap.show_hints()
+
+            u.disconnect_signal(self.app, 'enter', enter)
+
+            callback(text, *callback_args)
+
+        u.connect_signal(self.app, 'enter', enter)
+
+        self.app.footer_container.original_widget = editor
+        self.app.text_mode = False
+        self.app.focus_footer()

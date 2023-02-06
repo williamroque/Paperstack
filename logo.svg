@@ -2,13 +2,13 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="4.5in"
+   width="4.5999999in"
    height="0.80000001in"
-   viewBox="0 0 114.29999 20.32"
+   viewBox="0 0 116.83999 20.32"
    version="1.1"
    id="svg5"
    inkscape:version="1.2 (dc2aeda, 2022-05-15)"
-   sodipodi:docname="logo.svg.2023_02_06_14_47_01.0.svg"
+   sodipodi:docname="logo.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -26,15 +26,15 @@
      showgrid="false"
      showborder="true"
      borderlayer="true"
-     inkscape:zoom="2.1604032"
-     inkscape:cx="215.46904"
-     inkscape:cy="90.260929"
+     inkscape:zoom="1.8412046"
+     inkscape:cx="194.70948"
+     inkscape:cy="82.011526"
      inkscape:window-width="1440"
      inkscape:window-height="900"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
-     inkscape:current-layer="g965" />
+     inkscape:current-layer="g3154" />
   <defs
      id="defs2" />
   <g
@@ -56,56 +56,67 @@
         </g>
         <g
            id="g3154"
-           transform="translate(1.1650366)">
-          <rect
-             style="opacity:0.606;fill:#000000;stroke:#eaeaea;stroke-width:0.715996;stroke-dasharray:none;stroke-opacity:1"
-             id="rect249"
-             width="11.157606"
-             height="14.975977"
-             x="66.832954"
-             y="17.390644"
-             ry="0"
-             transform="matrix(0.54025911,0.29017055,-0.54364763,0.27642484,8.4878827,-7.1117918)" />
-          <rect
-             style="opacity:0.786;fill:#000000;stroke:#ffffff;stroke-width:0.715996;stroke-dasharray:none;stroke-opacity:1"
-             id="rect249-5"
-             width="11.157606"
-             height="14.975977"
-             x="62.548782"
-             y="13.133173"
-             ry="0"
-             transform="matrix(0.54025911,0.29017055,-0.54364763,0.27642484,8.4878827,-7.1117918)" />
-          <rect
-             style="opacity:1;fill:#0b0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.715996;stroke-dasharray:none;stroke-opacity:1"
-             id="rect249-6"
-             width="11.157606"
-             height="14.975977"
-             x="57.987373"
-             y="8.6001959"
-             ry="0"
-             transform="matrix(0.54025911,0.29017055,-0.54364763,0.27642484,8.4878827,-7.1117918)" />
-          <text
-             xml:space="preserve"
-             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.4056px;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:1.87325px;text-anchor:middle;opacity:0.606;fill:#0b0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.571;stroke-dasharray:none;stroke-opacity:1"
-             x="11.547"
-             y="22.772364"
-             id="text1105"><tspan
-               sodipodi:role="line"
-               id="tspan1103"
-               style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.4056px;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:#ffffff;stroke-width:0.571;stroke-opacity:1"
-               x="12.483624"
-               y="22.772364">PAP</tspan></text>
-          <text
-             xml:space="preserve"
-             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.4056px;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:1.87325px;text-anchor:middle;opacity:0.606;fill:#0b0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.571;stroke-dasharray:none;stroke-opacity:1"
-             x="70.999977"
-             y="23.066908"
-             id="text1163"><tspan
-               sodipodi:role="line"
-               style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.4056px;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:#ffffff;stroke-width:0.571;stroke-opacity:1"
-               x="71.9366"
-               y="23.066908"
-               id="tspan1165">RSTACK</tspan></text>
+           transform="translate(2.4350354)">
+          <g
+             id="g423"
+             transform="translate(-0.79035855)">
+            <g
+               id="g412">
+              <g
+                 id="g404"
+                 transform="translate(0.7903594)">
+                <rect
+                   style="opacity:0.606;fill:#000000;stroke:#eaeaea;stroke-width:0.715996;stroke-dasharray:none;stroke-opacity:1"
+                   id="rect249"
+                   width="11.157606"
+                   height="14.975977"
+                   x="66.832954"
+                   y="17.390644"
+                   ry="0"
+                   transform="matrix(0.54025911,0.29017055,-0.54364763,0.27642484,8.4878827,-7.1117918)" />
+                <rect
+                   style="opacity:0.786;fill:#000000;stroke:#ffffff;stroke-width:0.715996;stroke-dasharray:none;stroke-opacity:1"
+                   id="rect249-5"
+                   width="11.157606"
+                   height="14.975977"
+                   x="62.548782"
+                   y="13.133173"
+                   ry="0"
+                   transform="matrix(0.54025911,0.29017055,-0.54364763,0.27642484,8.4878827,-7.1117918)" />
+                <rect
+                   style="opacity:1;fill:#0b0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.715996;stroke-dasharray:none;stroke-opacity:1"
+                   id="rect249-6"
+                   width="11.157606"
+                   height="14.975977"
+                   x="57.987373"
+                   y="8.6001959"
+                   ry="0"
+                   transform="matrix(0.54025911,0.29017055,-0.54364763,0.27642484,8.4878827,-7.1117918)" />
+              </g>
+              <text
+                 xml:space="preserve"
+                 style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.4056px;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:1.87325px;text-anchor:middle;opacity:0.606;fill:#0b0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.571;stroke-dasharray:none;stroke-opacity:1"
+                 x="9.2477808"
+                 y="23.161573"
+                 id="text1105"><tspan
+                   sodipodi:role="line"
+                   id="tspan1103"
+                   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.4056px;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:#ffffff;stroke-width:0.571;stroke-opacity:1"
+                   x="10.184405"
+                   y="23.161573">PAP</tspan></text>
+            </g>
+            <text
+               xml:space="preserve"
+               style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.4056px;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:1.87325px;text-anchor:middle;opacity:0.606;fill:#0b0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.571;stroke-dasharray:none;stroke-opacity:1"
+               x="74.879913"
+               y="23.25976"
+               id="text1163"><tspan
+                 sodipodi:role="line"
+                 style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:13.4056px;font-family:'Noto Sans';-inkscape-font-specification:'Noto Sans, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:#ffffff;stroke-width:0.571;stroke-opacity:1"
+                 x="75.816536"
+                 y="23.25976"
+                 id="tspan1165">RSTACK</tspan></text>
+          </g>
         </g>
       </g>
     </g>

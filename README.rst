@@ -2,7 +2,7 @@ Paperstack
 ==========
 
 .. image:: logo.svg
-  :width: 400
+  :width: 700
   :alt: Paperstack logo
 
 **Paperstack** is a powerful, lightweight, universal bibliography

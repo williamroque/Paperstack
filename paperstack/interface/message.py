@@ -238,13 +238,15 @@ class AppMessenger:
                 self.app.text_mode = True
 
 
-    def ask_input(self, prompt, callback, *callback_args):
-        """Ask for input using footer with `prompt`, then call `callback`
-        with results.
+    def ask_input(self, prompt, default, callback, *callback_args):
+
+        """Ask for input using footer with `prompt` and with `default`
+        value, then call `callback` with results.
 
         Parameters
         ----------
         prompt : str
+        default : str
         callback : func
         callback_args : list
         """
@@ -252,25 +254,38 @@ class AppMessenger:
         if self.app is None:
             raise AppMessengerError
 
-        editor = u.Edit(prompt, wrap=u.CLIP)
+        if self.app.list_view.has_focus:
+            previous_focus = 'list'
+        else:
+            previous_focus = 'details'
+
+        editor = u.Edit(prompt, default, wrap=u.CLIP)
 
         def escape(_):
-            self.app.focus_list()
-            self.app.list_view.keymap.show_hints()
+            if previous_focus == 'list':
+                self.app.focus_list()
+                self.app.list_view.keymap.show_hints()
+            else:
+                self.app.focus_details()
+                self.app.detail_view.keymap.show_hints()
 
             u.disconnect_signal(self.app, 'escape', escape)
-            u.disconnect_signal(self.app, 'ctrl-e', enter)
+            u.disconnect_signal(self.app, 'ctrl-e', switch_editor)
 
         u.connect_signal(self.app, 'escape', escape)
 
         def enter(_):
             text = editor.get_edit_text()
 
-            self.app.focus_list()
-            self.app.list_view.keymap.show_hints()
+            if previous_focus == 'list':
+                self.app.focus_list()
+                self.app.list_view.keymap.show_hints()
+            else:
+                self.app.focus_details()
+                self.app.detail_view.keymap.show_hints()
 
             u.disconnect_signal(self.app, 'enter', enter)
-            u.disconnect_signal(self.app, 'ctrl-e', enter)
+            u.disconnect_signal(self.app, 'ctrl-e', switch_editor)
 
             callback(text, *callback_args)
 
@@ -293,9 +308,11 @@ class AppMessenger:
             self.app.loop.screen.start()
 
             with open(filename) as f:
-                editor.set_edit_text(f.read())
+                editor.set_edit_text(
+                    f.read().strip()
+                )
                 editor.set_edit_pos(
-                    len(editor.get_edit_text()) - 1
+                    len(editor.get_edit_text())
                 )
 
             os.remove(filename)

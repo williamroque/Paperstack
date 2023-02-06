@@ -136,7 +136,7 @@ class Library:
 
         try:
             self.cursor.execute(
-                f'UPDATE library SET {update_string} WHERE record_id = {record_id}'
+                f'UPDATE library SET {update_string} WHERE record_id = "{record_id}"'
             )
         except sqlite3.OperationalError:
             self.messenger.send_error(

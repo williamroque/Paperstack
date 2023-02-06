@@ -11,15 +11,16 @@ class EntryElement(u.WidgetWrap):
 
     Parameters
     ----------
-    name : paperstack.data.record.Record
+    field_name : str
+    name : str
     value : any
     width : int
         Panel width.
     keymap : paperstack.interface.keymap.Keymap
     """
 
-    def __init__ (self, name, value, width, keymap):
-        self.content = value
+    def __init__ (self, field_name, name, value, width, keymap):
+        self.content = (field_name, name)
 
         self.keymap = keymap
 
@@ -29,13 +30,15 @@ class EntryElement(u.WidgetWrap):
             ('entry_name', f'{name}: '), clean_text(value)
         ]
 
-        self.text = u.AttrWrap(
-            u.Text(text),
+        self.text = u.Text(text)
+
+        self.text_wrapper = u.AttrWrap(
+            self.text,
             'entry',
             'entry_selected'
         )
 
-        super().__init__(u.Padding(self.text, 'center', width - 2))
+        super().__init__(u.Padding(self.text_wrapper, 'center', width - 2))
 
 
     def keypress(self, size, key):
@@ -75,6 +78,7 @@ class DetailView(u.WidgetWrap):
     width : int
         Panel width.
     messenger : paperstack.interface.message.AppMessenger
+    library : paperstack.data.library.Library
     global_keymap : paperstack.interface.keymap.Keymap
     vim_keys : bool
 
@@ -83,16 +87,21 @@ class DetailView(u.WidgetWrap):
     width : int
         Panel width.
     messenger : paperstack.interface.message.AppMessenger
+    library : paperstack.data.library.Library
     keymap : paperstack.interface.keymap.Keymap
     has_focus : bool
+    record : paperstack.data.record.Record
     """
 
-    def __init__(self, width, messenger, global_keymap, vim_keys):
+    def __init__(self, width, messenger, library, global_keymap, vim_keys):
         self.width = width
         self.messenger = messenger
+        self.library = library
         self.keymap = Keymap(messenger, global_keymap)
 
         self.has_focus = False
+
+        self.record = None
 
         if vim_keys:
             self.keymap.bind('h', 'Focus list', self.focus_list)
@@ -102,6 +111,8 @@ class DetailView(u.WidgetWrap):
             self.keymap.bind('left', 'Focus list', self.focus_list)
             self.keymap.bind('down', 'Next', self.focus_next)
             self.keymap.bind('up', 'Previous', self.focus_previous)
+
+        self.keymap.bind('e', 'Edit entry', self.edit_entry)
 
         u.register_signal(self.__class__, ['focus_list'])
 
@@ -168,6 +179,8 @@ class DetailView(u.WidgetWrap):
         record : paperstack.data.record.Record
         """
 
+        self.record = record
+
         if record is None:
             while len(self.walker) > 0:
                 self.walker.pop()
@@ -179,17 +192,22 @@ class DetailView(u.WidgetWrap):
 
         for key, name, *_ in record.requirements:
             if key in record.record and record.record[key]:
-                if not first_entry:
-                    widgets.append(EntrySeparator())
+                value = record.record[key]
+            else:
+                value = ''
 
-                first_entry = False
+            if not first_entry:
+                widgets.append(EntrySeparator())
 
-                widgets.append(EntryElement(
-                    name,
-                    record.record[key],
-                    self.width,
-                    self.keymap
-                ))
+            first_entry = False
+
+            widgets.append(EntryElement(
+                key,
+                name,
+                value,
+                self.width,
+                self.keymap
+            ))
 
         u.disconnect_signal(self.walker, 'modified', self.modified)
 
@@ -201,3 +219,36 @@ class DetailView(u.WidgetWrap):
         u.connect_signal(self.walker, 'modified', self.modified)
 
         self.walker.set_focus(0)
+
+
+    def edit_entry(self):
+        "Edit currently selected entry."
+
+        widget, index = self.walker.get_focus()
+
+        field_name, name = widget.content
+
+        def commit_edit(text):
+            self.record.record[field_name] = text
+
+            record_id = self.record.record['record_id']
+
+            self.library.update(record_id, {
+                field_name: text
+            })
+            self.library.commit()
+
+            widget.text.set_text([
+                ('entry_name', f'{name}: '), clean_text(text)
+            ])
+
+        if field_name in self.record.record and self.record.record[field_name]:
+            value = self.record.record[field_name]
+        else:
+            value = ''
+
+        self.messenger.ask_input(
+            f'{name}: ',
+            value,
+            commit_edit
+        )

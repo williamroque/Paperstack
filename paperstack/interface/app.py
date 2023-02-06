@@ -85,6 +85,7 @@ class App:
         self.detail_view = DetailView(
             detail_width,
             self.messenger,
+            self.library,
             self.keymap,
             vim_keys
         )
@@ -263,6 +264,7 @@ class App:
                     requirement = requirements.pop(0)
                     self.messenger.ask_input(
                         f'{requirement[1]}: ',
+                        '',
                         callback,
                         requirement
                     )
@@ -283,6 +285,7 @@ class App:
             requirement = requirements.pop(0)
             self.messenger.ask_input(
                 f'{requirement[1]}: ',
+                '',
                 callback,
                 requirement
             )
@@ -314,6 +317,7 @@ class App:
                     field = suggested_fields.pop(0)
                     self.messenger.ask_input(
                         f'{field[1]}: ',
+                        '',
                         callback,
                         field
                     )
@@ -334,6 +338,7 @@ class App:
             field = suggested_fields.pop(0)
             self.messenger.ask_input(
                 f'{field[1]}: ',
+                '',
                 callback,
                 field
             )

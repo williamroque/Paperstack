@@ -1,10 +1,11 @@
-|logo|
-==========
-:align: center
+.. image:: logo.svg
+    :align: center
+    :width: 600
+    :alt: Paperstack logo
 
-.. |logo| image:: logo.svg
-  :width: 600
-  :alt: Paperstack logo
+==========
+Paperstack
+==========
 
 **Paperstack** is a powerful, lightweight, universal bibliography
 management tool written in Python.

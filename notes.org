@@ -42,7 +42,7 @@
 - [ ] Add actions (commands in lower panel)
 - [ ] Add marks (selection)
 - [ ] Add search
-- [ ] Add papers
+- [X] Add papers
 - [ ] Detect new files in directory, scrape and add
 - [ ] Batch import
 - [ ] Add installation guide and nice, user-friendly documentation

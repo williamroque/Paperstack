@@ -94,7 +94,7 @@ class App:
 
         u.connect_signal(self.detail_view, 'focus_list', self.focus_list)
 
-        u.register_signal(self.__class__, ['escape', 'enter'])
+        u.register_signal(self.__class__, ['escape', 'enter', 'ctrl-e'])
 
         self.text_mode = True
 
@@ -190,6 +190,8 @@ class App:
             u.emit_signal(self, 'enter', None)
         elif key == 'esc':
             u.emit_signal(self, 'escape', None)
+        elif key == 'ctrl e':
+            u.emit_signal(self, 'ctrl-e', None)
         elif self.text_mode:
             self.keymap.trigger(key)
 

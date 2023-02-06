@@ -22,6 +22,9 @@ DEFAULT_CONFIG = {
     },
     'keys': {
         'vim-bindings': 'no'
+    },
+    'editor': {
+        'command': 'vi'
     }
 }
 

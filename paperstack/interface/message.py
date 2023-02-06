@@ -1,6 +1,10 @@
 "Module responsible for handling messages to the user."
 
 import sys
+import tempfile
+import os
+
+from subprocess import call
 
 import urwid as u
 
@@ -101,11 +105,15 @@ class AppMessenger:
     app : paperstack.interface.app.App
     ansi_colors : bool
         If true, print with special colors using ANSI escape sequences.
+    editor_command : str
+        The command to use for editing long text.
     """
 
     def __init__(self, ansi_colors=True):
         self.app = None
+
         self.ansi_colors = ansi_colors
+        self.editor_command = 'vi'
 
 
     def connect_app(self, app):
@@ -244,13 +252,14 @@ class AppMessenger:
         if self.app is None:
             raise AppMessengerError
 
-        editor = u.Edit(prompt)
+        editor = u.Edit(prompt, wrap=u.CLIP)
 
         def escape(_):
             self.app.focus_list()
             self.app.list_view.keymap.show_hints()
 
             u.disconnect_signal(self.app, 'escape', escape)
+            u.disconnect_signal(self.app, 'ctrl-e', enter)
 
         u.connect_signal(self.app, 'escape', escape)
 
@@ -261,10 +270,37 @@ class AppMessenger:
             self.app.list_view.keymap.show_hints()
 
             u.disconnect_signal(self.app, 'enter', enter)
+            u.disconnect_signal(self.app, 'ctrl-e', enter)
 
             callback(text, *callback_args)
 
         u.connect_signal(self.app, 'enter', enter)
+
+        def switch_editor(_):
+            text = editor.get_edit_text()
+
+            fd, filename = tempfile.mkstemp(suffix='.tmp')
+
+            os.close(fd)
+
+            with open(filename, 'w') as f:
+                f.write(text)
+
+            self.app.loop.screen.stop()
+
+            call([self.editor_command, f.name])
+
+            self.app.loop.screen.start()
+
+            with open(filename) as f:
+                editor.set_edit_text(f.read())
+                editor.set_edit_pos(
+                    len(editor.get_edit_text()) - 1
+                )
+
+            os.remove(filename)
+
+        u.connect_signal(self.app, 'ctrl-e', switch_editor)
 
         self.app.footer_container.original_widget = editor
         self.app.text_mode = False

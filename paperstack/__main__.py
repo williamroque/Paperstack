@@ -371,6 +371,9 @@ def main():
     else:
         messenger = AppMessenger(args.ansi)
         config = Config(messenger, args.config_path)
+
+        messenger.editor_command = config.get('editor', 'command')
+
         library = Library(config, messenger)
 
         app = App(config, messenger, library)

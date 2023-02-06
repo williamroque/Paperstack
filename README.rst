@@ -1,9 +1,9 @@
-Paperstack
+|logo|
 ==========
+:align: center
 
-.. image:: logo.svg
+.. |logo| image:: logo.svg
   :width: 600
-  :align: center
   :alt: Paperstack logo
 
 **Paperstack** is a powerful, lightweight, universal bibliography

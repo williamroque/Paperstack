@@ -25,6 +25,8 @@ class Scraper:
 
     Attributes
     ----------
+    SUGGESTED_FIELDS : list
+        Fields potentially needed to scrape information.
     record : dict
         Keep track of scraped information.
     pdf_url : str
@@ -33,12 +35,21 @@ class Scraper:
     messenger : paperstack.interface.message.Messenger
     """
 
+    SUGGESTED_FIELDS = []
+
     def __init__(self, record, config, messenger):
         self.record = record
         self.pdf_url = None
 
         self.config = config
         self.messenger = messenger
+
+
+    @property
+    def suggested_fields(self):
+        "Get suggested fields."
+
+        return self.__class__.SUGGESTED_FIELDS
 
 
     def scrape(self):
@@ -100,6 +111,12 @@ class ADSScraper(Scraper):
     """Scraper for the NASA/Harvard Astrophysics Data System. We need an
     API key for this one, specified in the config under [ads]/key.
     """
+
+    SUGGESTED_FIELDS = [
+        ('bibcode', 'Bibcode'),
+        ('doi', 'DOI'),
+        ('title', 'Title')
+    ]
 
     def get_headers(self):
         "Generate request headers."
@@ -265,6 +282,11 @@ class ArXivScraper(Scraper):
     """Scraper for the arXiv database.
     """
 
+    SUGGESTED_FIELDS = [
+        ('arxiv', 'arXiv ID'),
+        ('title', 'Title')
+    ]
+
     def scrape(self):
         if 'arxiv' in self.record:
             arxiv = self.record['arxiv']
@@ -273,7 +295,7 @@ class ArXivScraper(Scraper):
             title = self.record['title']
             identifier = f'ti:{title}'
         else:
-            self.messenger.send_error('ArXiv ID or title is needed to scrape with arXiv.')
+            self.messenger.send_error('arXiv ID or title is needed to scrape with arXiv.')
 
         identifier = quote_plus(identifier)
         url = f'http://export.arxiv.org/api/query?search_query={identifier}&start=0&max_results=1'

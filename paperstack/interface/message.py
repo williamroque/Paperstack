@@ -187,7 +187,7 @@ class AppMessenger:
             print(f'Warning: {message}')
         else:
             if self.ansi_colors:
-                self.app.change_colors('footer', 'dark yellow', '')
+                self.app.change_colors('footer', 'yellow', '')
 
 
             if self.app.text_mode:

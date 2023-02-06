@@ -1,9 +1,12 @@
 "Module responsible for the list panel."
 
+from pathlib import Path
+
 import urwid as u
 
 from paperstack.interface.keymap import Keymap
 from paperstack.interface.util import clean_text
+from paperstack.utility import open_path
 
 
 class RecordElement(u.WidgetWrap):
@@ -90,6 +93,7 @@ class ListView(u.WidgetWrap):
             ['Delete record', 'Confirm'],
             self.remove_record
         )
+        self.keymap.bind('o', 'Open PDF', self.open_pdf)
 
         if vim_keys:
             self.keymap.bind('l', 'Focus details', self.focus_details)
@@ -175,6 +179,24 @@ class ListView(u.WidgetWrap):
         self.library.commit()
 
         del self.walker[index]
+
+
+    def open_pdf(self):
+        "Open PDF corresponding to record from database."
+
+        widget, index = self.walker.get_focus()
+
+        record = widget.content.record
+
+        if 'path' in record and record['path']:
+            path = Path(record['path'])
+
+            if path.is_file():
+                open_path(str(path.absolute()))
+            else:
+                self.messenger.send_warning('Specified path does not exist.')
+        else:
+            self.messenger.send_warning('No PDF path specified.')
 
 
     def set_data(self, records):

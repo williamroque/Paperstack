@@ -7,6 +7,7 @@ import urwid as u
 from paperstack.interface.keymap import Keymap
 from paperstack.interface.message import AppMessengerError
 from paperstack.data.record import record_constructors
+from paperstack.data.scraper import scraper_constructors
 
 from paperstack.interface.list import ListView
 from paperstack.interface.details import DetailView
@@ -35,7 +36,7 @@ class App:
         )
         self.keymap.bind_combo(
             ['a', 's', 'x'],
-            ['Add record', 'Scrape', 'ArXiV'],
+            ['Add record', 'Scrape', 'arXiv'],
             lambda: self.add_scraped('arxiv')
         )
 
@@ -287,21 +288,53 @@ class App:
             pass
 
 
-    def add_scraped(self, record_type):
-        "Add record type manually."
+    def add_scraped(self, database):
+        """Scrape database using information provided by input..
+
+        Parameters
+        ----------
+        database : str
+        """
 
         try:
-            if record_type not in record_constructors:
-                self.messenger.send_error(f'Record type `{record_type}` does not exist.')
+            if database not in scraper_constructors:
+                self.messenger.send_error(f'Database `{database}` not supported.')
 
-            constructor = record_constructors[record_type]
-            record = constructor({}, self.config, self.messenger)
+            constructor = scraper_constructors[database]
+            scraper = constructor({}, self.config, self.messenger)
 
-            for requirement in record.requirements:
-                self.messenger.ask_input(
-                    f'{requirement[1]}: ',
-                    lambda: ()
-                )
+            suggested_fields = copy(scraper.suggested_fields)
+
+            def callback(text, field):
+                scraper.record[field[0]] = text
+
+                if len(suggested_fields) > 0:
+                    field = suggested_fields.pop(0)
+                    self.messenger.ask_input(
+                        f'{field[1]}: ',
+                        callback,
+                        field
+                    )
+                else:
+                    try:
+                        record = scraper.create_record()
+                        record.download_pdf(scraper)
+
+                        self.library.add(record)
+                        self.library.commit()
+
+                        self.update_data(
+                            self.library.filter([])
+                        )
+                    except AppMessengerError:
+                        pass
+
+            field = suggested_fields.pop(0)
+            self.messenger.ask_input(
+                f'{field[1]}: ',
+                callback,
+                field
+            )
         except AppMessengerError:
             pass
 

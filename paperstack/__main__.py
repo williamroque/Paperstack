@@ -1,9 +1,7 @@
 """Paperstack: A universal bibliography management tool"""
 
 import argparse
-import subprocess
 import os
-import platform
 
 from paperstack.data.library import Library
 from paperstack.data.record import record_constructors
@@ -12,6 +10,7 @@ from paperstack.filesystem.config import Config
 from paperstack.interface.message import Messenger
 from paperstack.interface.message import AppMessenger
 from paperstack.utility import parse_dict
+from paperstack.utility import open_path
 from paperstack.interface.app import App
 
 
@@ -127,12 +126,7 @@ def open_record(args):
 
     path = record.record['path']
 
-    if platform.system() == 'Darwin':
-        subprocess.call(('open', path))
-    elif platform.system() == 'Windows':
-        os.startfile(path)
-    else:
-        subprocess.call(('xdg-open', path))
+    open_path(path)
 
 
 def scrape(args):

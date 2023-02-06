@@ -24,7 +24,7 @@
 - Show only a few special columns in table
   - When searching, show and highlight columns being searched
 
-* Roadmap [52%]
+* Roadmap [63%]
 
 - [X] Set up argparse
 - [X] Set up config file
@@ -39,7 +39,7 @@
 - [X] Start writing good documentation
 - [X] Set up UI
 - [X] Add table and preview
-- [ ] Add actions (commands in lower panel)
+- [X] Add actions (commands in lower panel)
 - [ ] Add marks (selection)
 - [ ] Add search
 - [X] Add papers

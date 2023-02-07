@@ -8,8 +8,8 @@ def readme():
 
 
 setup(
-    name='Paperstack',
-    version='1.0.3',
+    name='paperstack',
+    version='1.0.4',
     description='A powerful, lightweight, universal bibliography management tool',
     long_description=readme(),
     long_description_content_type='text/markdown',

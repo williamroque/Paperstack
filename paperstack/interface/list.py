@@ -7,6 +7,7 @@ import urwid as u
 from paperstack.interface.keymap import Keymap
 from paperstack.interface.util import clean_text
 from paperstack.utility import open_path
+from paperstack.filesystem.file import File
 
 
 class RecordElement(u.WidgetWrap):
@@ -94,6 +95,11 @@ class ListView(u.WidgetWrap):
             self.remove_record
         )
         self.keymap.bind('o', 'Open PDF', self.open_pdf)
+        self.keymap.bind_combo(
+            ['e', 'b'],
+            ['Export', 'BibTeX'],
+            self.export_bibtex
+        )
 
         if vim_keys:
             self.keymap.bind('l', 'Focus details', self.focus_details)
@@ -197,6 +203,27 @@ class ListView(u.WidgetWrap):
                 self.messenger.send_warning('Specified path does not exist.')
         else:
             self.messenger.send_warning('No PDF path specified.')
+
+
+    def export_bibtex(self):
+        "Export current record to BibTeX and write to specified path."
+
+        widget, index = self.walker.get_focus()
+
+        text = widget.content.to_bibtex()
+
+        def write_bibtex(path):
+            bibtex_file = File(path)
+            bibtex_file.ensure()
+
+            with open(bibtex_file.path, 'w') as f:
+                f.write(text)
+
+        self.messenger.ask_input(
+            'Export path: ',
+            'refs.bib',
+            write_bibtex
+        )
 
 
     def set_data(self, records):

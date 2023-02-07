@@ -5,6 +5,7 @@ import os
 
 import bibtexparser
 from bibtexparser.bibdatabase import BibDatabase
+from bibtexparser.bwriter import BibTexWriter
 
 from paperstack.data.constants import COLUMNS
 from paperstack.filesystem.file import File
@@ -324,7 +325,10 @@ class Article(Record):
 
         database.entries = [bibtex_entries]
 
-        return bibtexparser.dumps(database)
+        writer = BibTexWriter()
+        writer.indent = '    '
+
+        return bibtexparser.dumps(database, writer)
 
 
 record_constructors = {

@@ -13,7 +13,7 @@ Paperstack is a powerful, lightweight, universal bibliography management tool wr
 
 ## Installation
 
-Paperstack can be installed from PyPI with the following command.
+Paperstack can be installed from PyPI with the following command:
 
 ```sh
 python3 -m pip install paperstack

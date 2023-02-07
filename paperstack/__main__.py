@@ -126,7 +126,10 @@ def open_record(args):
 
     path = record.record['path']
 
-    open_path(path)
+    try:
+        open_path(path)
+    except Exception:
+        messenger.send_error('Could not open PDF in preferred application.')
 
 
 def scrape(args):

@@ -198,7 +198,10 @@ class ListView(u.WidgetWrap):
             path = Path(record['path'])
 
             if path.is_file():
-                open_path(str(path.absolute()))
+                try:
+                    open_path(str(path.absolute()))
+                except Exception:
+                    self.messenger.send_warning('Could not open PDF in preferred application.')
             else:
                 self.messenger.send_warning('Specified path does not exist.')
         else:

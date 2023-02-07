@@ -303,7 +303,10 @@ class AppMessenger:
 
             self.app.loop.screen.stop()
 
-            call([self.editor_command, f.name])
+            try:
+                call([self.editor_command, f.name])
+            except Exception:
+                self.send_warning(f'Could not connect to editor using command `{self.editor_command}`.')
 
             self.app.loop.screen.start()
 

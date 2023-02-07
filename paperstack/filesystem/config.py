@@ -11,7 +11,7 @@ DEFAULT_CONFIG = {
         'data': '~/Documents/Paperstack/'
     },
     'article': {
-        'id-format': 'author#2-title#10-year#4'
+        'id-format': 'author@2-title@10-year@4'
     },
     'ads': {
         'key': '',

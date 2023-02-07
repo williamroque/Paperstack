@@ -42,6 +42,8 @@ def parse_dict(raw):
     dict
     """
 
+    raw = raw.replace('https://', '')
+
     parsed_dict = {}
     entries = raw.split(';')
 

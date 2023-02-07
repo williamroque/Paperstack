@@ -36,11 +36,15 @@ def filter_records(args):
 
     messenger = Messenger(args.ansi)
 
-    filters = list(parse_dict(args.query).items())
-    records = library.filter(filters)
+    try:
+        filters = list(parse_dict(args.query).items())
 
-    for record in records:
-        messenger.send_neutral(record)
+        records = library.filter(filters)
+
+        for record in records:
+            messenger.send_neutral(record)
+    except ValueError:
+        messenger.send_error('Invalid entries string.')
 
 
 def add_record(args):
@@ -55,12 +59,15 @@ def add_record(args):
 
     constructor = record_constructors[args.type]
 
-    record = constructor(parse_dict(args.entries), config, messenger)
+    try:
+        record = constructor(parse_dict(args.entries), config, messenger)
 
-    library.add(record)
-    library.commit()
+        library.add(record)
+        library.commit()
 
-    messenger.send_success('Added item.')
+        messenger.send_success('Added item.')
+    except ValueError:
+        messenger.send_error('Invalid entries string.')
 
 
 def remove_record(args):
@@ -88,10 +95,13 @@ def update_record(args):
 
     messenger = Messenger(args.ansi)
 
-    library.update(args.id, parse_dict(args.entries))
-    library.commit()
+    try:
+        library.update(args.id, parse_dict(args.entries))
+        library.commit()
 
-    messenger.send_success('Updated item.')
+        messenger.send_success('Updated item.')
+    except ValueError:
+        messenger.send_error('Invalid entries string.')
 
 
 def get_record(args):
@@ -143,26 +153,29 @@ def scrape(args):
 
     constructor = scraper_constructors[args.database]
 
-    scraper = constructor(
-        parse_dict(args.entries),
-        config,
-        messenger
-    )
+    try:
+        scraper = constructor(
+            parse_dict(args.entries),
+            config,
+            messenger
+        )
 
-    record = scraper.create_record()
+        record = scraper.create_record()
 
-    if args.add:
-        record.download_pdf(scraper)
+        if args.add:
+            record.download_pdf(scraper)
 
-        library = Library(config, messenger)
-        library.add(record)
-        library.commit()
+            library = Library(config, messenger)
+            library.add(record)
+            library.commit()
 
-        messenger.send_neutral(record)
+            messenger.send_neutral(record)
 
-        messenger.send_success('Added item.')
-    else:
-        messenger.send_neutral(record)
+            messenger.send_success('Added item.')
+        else:
+            messenger.send_neutral(record)
+    except ValueError:
+        messenger.send_error('Invalid entries string.')
 
 
 def export_record(args):

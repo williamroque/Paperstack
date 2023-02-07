@@ -2,6 +2,7 @@
 
 from urllib.parse import quote_plus
 from xml.etree import ElementTree
+import re
 
 from datetime import datetime
 
@@ -289,7 +290,15 @@ class ArXivScraper(Scraper):
 
     def scrape(self):
         if 'arxiv' in self.record:
-            arxiv = self.record['arxiv']
+            arxiv = self.record['arxiv'].strip()
+
+            id_match = re.search(r'[0-9vV]+\.[0-9vV]+$', arxiv)
+
+            if not id_match:
+                self.messenger.send_error('Invalid arXiv ID.')
+
+            arxiv = id_match.group(0)
+
             identifier = f'id:{arxiv}'
         elif 'title' in self.record:
             title = self.record['title']
@@ -313,6 +322,13 @@ class ArXivScraper(Scraper):
 
         tree = ElementTree.fromstring(response.content)
         entry = tree[-1]
+
+        results_count = int(tree.find(
+            '{http://a9.com/-/spec/opensearch/1.1/}totalResults'
+        ).text)
+
+        if results_count == 0:
+            self.messenger.send_error('No results found matching query.')
 
         abstract = entry.find('{http://www.w3.org/2005/Atom}summary').text
         abstract = abstract.strip().replace('\n', ' ').replace('  ', '')

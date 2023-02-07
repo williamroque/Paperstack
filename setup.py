@@ -9,7 +9,7 @@ def readme():
 
 setup(
     name='paperstack',
-    version='1.0.5',
+    version='1.0.6',
     description='A powerful, lightweight, universal bibliography management tool',
     long_description=readme(),
     long_description_content_type='text/markdown',

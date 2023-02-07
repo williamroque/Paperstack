@@ -51,6 +51,31 @@ paperstack list
 
 to list all added records in the library. To open the interactive interface, run `paperstack` by itself.
 
+Configuration for Paperstack goes in `$HOME/.paperstack.cfg`. The config file follows a standard similar to windows `.ini`. Sections are labeled with `[section name]` and settings are written as `key = value`. Check the documentation for the different settings you can customize. Below is an example configuration.
+
+```ini
+[paths]
+data = ~/Documents/Paperstack/
+
+[article]
+id-format = author@2-title@15-year@4
+
+[ads]
+key = <YOUR-API-KEY>
+timeout = 10
+
+[arxiv]
+timeout = 10
+
+[keys]
+vim-bindings = yes
+
+[editor]
+command = nvim
+```
+
+Note that to scrape ADS, a valid API key has to be specified in the config file.
+
 ## Contributing
 
 All contributions are welcome. Reporting issues on the GitHub repository is greatly appreciated, but pull requests are preferred. In particular, help is needed to:

@@ -68,7 +68,7 @@ class Record:
         """
 
         record = {}
-        
+
         for key, value in self.record.items():
             if value is not None:
                 width = max(len(key), len(value))
@@ -114,6 +114,8 @@ class Record:
 
         for key, value in self.record.items():
             if value is not None:
+                value = value.replace('\n', ' ')
+
                 if len(key) > column_width:
                     key = key[:column_width - 5].strip() + '[...]'
 

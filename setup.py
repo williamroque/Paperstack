@@ -9,10 +9,10 @@ def readme():
 
 setup(
     name='Paperstack',
-    version='1.0.0',
+    version='1.0.3',
     description='A powerful, lightweight, universal bibliography management tool',
     long_description=readme(),
-    long_description_content_type='text/x-rst',
+    long_description_content_type='text/markdown',
     url='https://github.com/williamroque/Paperstack',
     author='William Roque',
     author_email='william.aroque@gmail.com',

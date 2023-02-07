@@ -2,6 +2,8 @@
 <img src="https://raw.githubusercontent.com/williamroque/Paperstack/main/logo.svg" width="600">
 </h1><br>
 
+[![PyPI version](https://badge.fury.io/py/paperstack.svg)](https://badge.fury.io/py/paperstack) [![GitHub version](https://badge.fury.io/gh/williamroque%2FPaperstack.svg)](https://badge.fury.io/gh/williamroque%2FPaperstack)
+
 Paperstack is a powerful, lightweight, universal bibliography management tool written in Python.
 
 - [GitHub repository](https://github.com/williamroque/Paperstack).

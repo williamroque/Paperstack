@@ -6,7 +6,7 @@
 
 Paperstack is a powerful, lightweight, universal bibliography management tool written in Python.
 
-- [GitHub repository](https://github.com/williamroque/Paperstack).
+- [GitHub repository](https://github.com/williamroque/Paperstack)
 
 ## Table of Contents
 
@@ -45,7 +45,7 @@ The program can be used both through the CLI and an interactive text-based inter
 paperstack add article 'author: Albert Einstein; title: Die Grundlage der allgemeinen Relativitätstheorie; journal: AdP; year: 1916'
 ```
 
-to add a new paper. Note the syntax for entries ("key1: value1; key2: value2"). Then run
+to add a new paper. Note the syntax for entries (`key1: value1; key2: value2`). Then run
 
 ```sh
 paperstack list
@@ -53,7 +53,7 @@ paperstack list
 
 to list all added records in the library. To open the interactive interface, run `paperstack` by itself.
 
-Configuration for Paperstack goes in `$HOME/.paperstack.cfg`. The config file follows a standard similar to windows `.ini`. Sections are labeled with `[section name]` and settings are written as `key = value`. Check the documentation for the different settings you can customize. Below is an example configuration.
+Configuration for Paperstack goes in `$HOME/.paperstack.cfg`. The config file follows a standard similar to Windows `.ini` files. Sections are labeled with `[section name]` and settings are written as `key = value`. Check the documentation for the different settings you can customize. Below is an example configuration.
 
 ```ini
 [paths]
@@ -90,6 +90,8 @@ All contributions are welcome. Reporting issues on the GitHub repository is grea
 - Any other goals or roadmap items listed in the [Project Notes](./notes.org).
 
 Note that contributions should follow PEP 8 as closely as possible (though not strictly enforced), docstrings should follow the [Numpy format](https://numpydoc.readthedocs.io/en/latest/format.html), and that, in general, simple, flat, and scalable code is strongly encouraged.
+
+A special thanks to [Dr. Mosenkov](https://physics.byu.edu/department/directory/mosenkov) for conceiving and co-creating this project.
 
 ## License
 

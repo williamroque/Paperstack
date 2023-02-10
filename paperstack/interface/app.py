@@ -12,6 +12,8 @@ from paperstack.data.scraper import scraper_constructors
 from paperstack.interface.list import ListView
 from paperstack.interface.details import DetailView
 
+from paperstack.utility import parse_dict
+
 
 class App:
     "The main app."
@@ -23,6 +25,8 @@ class App:
         self.keymap = Keymap(self.messenger)
 
         self.keymap.bind('q', 'Exit app', self.quit)
+
+        self.keymap.bind('f', 'Filter', self.filter_records)
 
         self.keymap.bind_combo(
             ['a', 'm', 'a'],
@@ -44,11 +48,11 @@ class App:
             ('bg', '', ''),
             ('record', '', ''),
             ('record_selected', 'dark green', ''),
-            ('record_marked', 'white', 'dark blue'),
+            ('record_marked', 'dark blue', ''),
             ('entry_selected', 'underline', ''),
-            ('entry_marked', 'white', 'dark blue'),
             ('entry_name', 'dark blue', ''),
-            ('footer', '', '')
+            ('footer', '', ''),
+            ('tag', 'black', 'light blue')
         }
 
         size = u.raw_display.Screen().get_cols_rows()
@@ -171,6 +175,24 @@ class App:
         raise u.ExitMainLoop()
 
 
+    def filter_records(self):
+        "Filter and display records."
+
+        def display(text):
+            filters = list(parse_dict(text, 'title').items())
+
+            try:
+                records = self.library.filter(filters)
+
+                self.update_data(records)
+            except AppMessengerError:
+                pass
+
+        self.messenger.ask_input(
+            'Filter: ', '', display
+        )
+
+
     def unhandled_input(self, key):
         """Take care of global key bindings.
 
@@ -250,7 +272,7 @@ class App:
                     requirements.append(requirement)
 
             def callback(text, requirement):
-                record.record[requirement[0]] = text
+                record[requirement[0]] = text
 
                 if len(requirements) > 0:
                     requirement = requirements.pop(0)

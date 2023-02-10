@@ -2,8 +2,11 @@
 
 import urwid as u
 
+import re
+
 from paperstack.interface.keymap import Keymap
 from paperstack.interface.util import clean_text
+from paperstack.interface.message import AppMessengerError
 
 
 class EntryElement(u.WidgetWrap):
@@ -22,13 +25,9 @@ class EntryElement(u.WidgetWrap):
 
         self.keymap = keymap
 
-        text = clean_text(value)
-
-        text = [
-            ('entry_name', f'{name}: '), clean_text(value)
-        ]
-
-        self.text = u.Text(text)
+        self.text = u.Text(
+            EntryElement.get_entry_text(field_name, name, value)
+        )
 
         self.text_wrapper = u.AttrWrap(
             self.text,
@@ -37,6 +36,40 @@ class EntryElement(u.WidgetWrap):
         )
 
         super().__init__(u.Padding(self.text_wrapper, 'center', ('relative', 90)))
+
+
+    @staticmethod
+    def get_entry_text(field_name, name, value):
+        """Get the text for an entry element.
+
+        Parameters
+        ----------
+        field_name : str
+        name : str
+        value : str
+
+        Returns
+        -------
+        str
+        """
+
+        text = [
+            ('entry_name', f'{name}: ')
+        ]
+
+        if field_name == 'tags':
+            tags = re.findall(
+                r';(.*?);',
+                clean_text(value)
+            )
+
+            for tag in tags:
+                text.append(('tag', f' {tag} '))
+                text.append(' ')
+        else:
+            text.append(clean_text(value))
+
+        return text
 
 
     def keypress(self, size, key):
@@ -242,23 +275,39 @@ class DetailView(u.WidgetWrap):
         field_name, name = widget.content
 
         def commit_edit(text):
-            self.record.record[field_name] = text
+            old_entry = self.record.record[field_name]
 
-            record_id = self.record.record['record_id']
+            self.record[field_name] = text
 
-            self.library.update(record_id, {
-                field_name: text
-            })
-            self.library.commit()
+            try:
+                self.record.sanitize()
+                self.record.validate()
 
-            widget.text.set_text([
-                ('entry_name', f'{name}: '), clean_text(text)
-            ])
+                text = self.record.record[field_name] or ''
 
-            self.messenger.send_success('Edited entry.')
+                record_id = self.record.record['record_id']
+
+                self.library.update(record_id, {
+                    field_name: text
+                })
+                self.library.commit()
+
+                widget.text.set_text(
+                    EntryElement.get_entry_text(field_name, name, text)
+                )
+
+                self.messenger.send_success('Edited entry.')
+            except AppMessengerError:
+                self.record[field_name] = old_entry
 
         if field_name in self.record.record and self.record.record[field_name]:
-            value = self.record.record[field_name]
+            if field_name == 'tags':
+                value = ', '.join(re.findall(
+                    r';(.*?);',
+                    self.record.record[field_name]
+                ))
+            else:
+                value = self.record.record[field_name]
         else:
             value = ''
 

@@ -125,10 +125,21 @@ class Library:
             Dictionary containing the fields and values to update.
         """
 
+        record = self.get(record_id)
+        record.record = {**record.record, **entries}
+        record.validate()
+        record.sanitize()
+
+        for key in entries:
+            entries[key] = record.record[key]
+
         update_strings = []
 
         for field, value in entries.items():
-            value = value.replace('"', '%QUOTE')
+            if value:
+                value = value.replace('"', '%QUOTE')
+            else:
+                value = ''
 
             update_strings.append(f'{field} = "{value}"')
 
@@ -194,7 +205,9 @@ class Library:
                     query = query.strip()
                     query = query.replace('"', '')
 
-                    if query[0] == '`':
+                    if field == 'tags':
+                        filter_strings.append(f'{field} LIKE "%;{query};%"')
+                    elif query and query[0] == '`':
                         filter_strings.append(f'{field} = "{query[1:]}"')
                     else:
                         filter_strings.append(f'{field} LIKE "%{query}%"')

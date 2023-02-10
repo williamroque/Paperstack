@@ -289,10 +289,12 @@ class ArXivScraper(Scraper):
     ]
 
     def scrape(self):
+        arxiv = None
+
         if 'arxiv' in self.record:
             arxiv = self.record['arxiv'].strip()
 
-            id_match = re.search(r'[0-9vV]+\.[0-9vV]+$', arxiv)
+            id_match = re.search(r'[0-9vV]+\.?[0-9vV]+$', arxiv)
 
             if not id_match:
                 self.messenger.send_error('Invalid arXiv ID.')
@@ -342,6 +344,18 @@ class ArXivScraper(Scraper):
         if doi_element:
             doi = doi_element.text.strip()
 
+        if not arxiv:
+            id_match = re.search(
+                r'[0-9vV]+\.?[0-9vV]+$',
+                entry.find('{http://www.w3.org/2005/Atom}id').text.strip()
+            )
+
+            print(entry.find('{http://www.w3.org/2005/Atom}id').text.strip())
+
+            if id_match:
+                arxiv = id_match.group(0)
+
+
         date = entry.find('{http://www.w3.org/2005/Atom}published').text.strip()
         date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
 
@@ -373,7 +387,8 @@ class ArXivScraper(Scraper):
             'journal': 'arXiv',
             'year': str(date.year),
             'month': str(date.month),
-            'doi': doi
+            'doi': doi,
+            'arxiv': arxiv
         }
 
         if comment is not None:

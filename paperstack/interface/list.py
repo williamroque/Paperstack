@@ -94,7 +94,7 @@ class ListView(u.WidgetWrap):
         )
         self.keymap.bind('o', 'Open PDF', self.open_pdf)
         self.keymap.bind('m', 'Toggle mark', self.mark)
-        self.keymap.bind('a', 'Mark all', self.mark_all)
+        self.keymap.bind('M', 'Mark all', self.mark_all)
         self.keymap.bind_combo(
             ['e', 'b'],
             ['Export', 'BibTeX'],
@@ -214,7 +214,10 @@ class ListView(u.WidgetWrap):
             record_id = record['record_id']
 
             if 'path' in record and record['path']:
-                os.remove(record['path'])
+                try:
+                    os.remove(record['path'])
+                except FileNotFoundError:
+                    pass
 
             self.library.remove(record_id)
             self.library.commit()
@@ -261,7 +264,7 @@ class ListView(u.WidgetWrap):
             widget.text_wrapper.set_attr('record')
         else:
             self.marks.add(widget)
-            widget.text_wrapper.set_attr('entry_name')
+            widget.text_wrapper.set_attr('record_marked')
 
         self.focus_next()
 
@@ -275,7 +278,7 @@ class ListView(u.WidgetWrap):
                 widget.text_wrapper.set_attr('record')
             else:
                 self.marks.add(widget)
-                widget.text_wrapper.set_attr('entry_name')
+                widget.text_wrapper.set_attr('record_marked')
 
 
 

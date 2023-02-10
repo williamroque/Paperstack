@@ -80,7 +80,10 @@ def remove_record(args):
     record = library.get(args.id)
 
     if 'path' in record.record and record.record['path']:
-        os.remove(record.record['path'])
+        try:
+            os.remove(record.record['path'])
+        except FileNotFoundError:
+            pass
 
     library.remove(args.id)
     library.commit()

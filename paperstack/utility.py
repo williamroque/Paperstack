@@ -29,13 +29,15 @@ def open_path(path):
         )
 
 
-def parse_dict(raw):
+def parse_dict(raw, default_key=None):
     """Parse string of type 'key1: value1; key2: value2; [...]' into
     dictionary.
 
     Parameters
     ----------
     raw : str
+    default_key : str
+        If an entry appears without a key, use this as the default.
 
     Returns
     -------
@@ -49,8 +51,13 @@ def parse_dict(raw):
 
     for entry in entries:
         if ':' in entry:
-            key, value = entry.split(':')
+            items = entry.split(':')
 
-            parsed_dict[key.strip()] = value.strip()
+            if len(items) == 2:
+                key, value = items
+
+                parsed_dict[key.strip()] = value.strip()
+        elif default_key and entry:
+            parsed_dict[default_key] = entry
 
     return parsed_dict

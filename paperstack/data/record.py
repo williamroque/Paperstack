@@ -48,6 +48,7 @@ class Record:
         self.messenger = messenger
 
         if not delay_setup:
+            self.sanitize()
             self.setup()
             self.validate()
 
@@ -150,6 +151,25 @@ class Record:
             output = self.tabulate_vertical(column_width)
 
         return output
+
+
+    def __setitem__(self, key, value):
+        "Set record entry."
+
+        self.record[key] = value
+
+        self.sanitize()
+
+
+    def sanitize(self):
+        "Treat various entries in the record."
+
+        if 'tags' in self.record and self.record['tags']:
+            if not re.match(r'^(;.*?;)*$', self.record['tags']):
+                tags = re.split(r'\s*,\s*', self.record['tags'])
+                tags = [f';{tag};' for tag in tags if tag]
+
+                self.record['tags'] = ''.join(tags)
 
 
     def validate(self):
@@ -293,6 +313,7 @@ class Article(Record):
         ('issn', 'ISSN', str, False, None),
         ('bibnote', 'Bibnote', str, False, None),
         ('bibcode', 'Bibcode', str, False, None),
+        ('arxiv', 'arXiv ID', str, False, None),
         ('note', 'Note', str, False, None),
         ('path', 'Path', str, False, None),
         ('record_id', 'Record ID', str, True, None)

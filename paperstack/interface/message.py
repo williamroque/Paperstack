@@ -304,7 +304,11 @@ class AppMessenger:
             self.app.loop.screen.stop()
 
             try:
-                call([self.editor_command, f.name])
+                if '@FILE' in self.editor_command:
+                    call(self.editor_command.replace('@FILE', f.name), shell=True)
+                else:
+                    call([self.editor_command, f.name])
+
             except Exception:
                 self.send_warning(f'Could not connect to editor using command `{self.editor_command}`.')
 

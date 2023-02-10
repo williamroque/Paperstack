@@ -269,6 +269,7 @@ class AppMessenger:
                 self.app.focus_details()
                 self.app.detail_view.keymap.show_hints()
 
+            u.disconnect_signal(self.app, 'enter', enter)
             u.disconnect_signal(self.app, 'escape', escape)
             u.disconnect_signal(self.app, 'ctrl-e', switch_editor)
 
@@ -285,6 +286,7 @@ class AppMessenger:
                 self.app.detail_view.keymap.show_hints()
 
             u.disconnect_signal(self.app, 'enter', enter)
+            u.disconnect_signal(self.app, 'escape', escape)
             u.disconnect_signal(self.app, 'ctrl-e', switch_editor)
 
             callback(text, *callback_args)

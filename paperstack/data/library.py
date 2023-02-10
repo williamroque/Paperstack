@@ -125,6 +125,9 @@ class Library:
             Dictionary containing the fields and values to update.
         """
 
+        if len(entries) == 0:
+            return
+
         record = self.get(record_id)
         record.record = {**record.record, **entries}
         record.validate()

@@ -3,10 +3,16 @@
 from pathlib import Path
 import os
 
+from copy import copy
+
 import urwid as u
 
 from paperstack.interface.keymap import Keymap
 from paperstack.interface.util import clean_text
+from paperstack.data.scraper import scraper_constructors
+
+from paperstack.interface.message import AppMessengerError
+
 from paperstack.utility import open_path
 from paperstack.filesystem.file import File
 
@@ -58,6 +64,7 @@ class ListView(u.WidgetWrap):
 
     Parameters
     ----------
+    config : paperstack.filesystem.config.Config
     messenger : paperstack.interface.message.AppMessenger
     library : paperstack.data.library.Library
     global_keymap : paperstack.interface.keymap.Keymap
@@ -65,6 +72,7 @@ class ListView(u.WidgetWrap):
 
     Attributes
     ----------
+    config : paperstack.filesystem.config.Config
     messenger : paperstack.interface.message.AppMessenger
     library : paperstack.data.library.Library
     keymap : paperstack.interface.keymap.Keymap
@@ -77,7 +85,8 @@ class ListView(u.WidgetWrap):
         Currently selected records (actions on multiple records at a time).
     """
 
-    def __init__(self, messenger, library, global_keymap, vim_keys):
+    def __init__(self, config, messenger, library, global_keymap, vim_keys):
+        self.config = config
         self.messenger = messenger
         self.library = library
         self.keymap = Keymap(messenger, global_keymap)
@@ -93,13 +102,23 @@ class ListView(u.WidgetWrap):
             self.remove_record
         )
         self.keymap.bind('o', 'Open PDF', self.open_pdf)
-        self.keymap.bind('m', 'Toggle mark', self.mark)
-        self.keymap.bind('M', 'Mark all', self.mark_all)
         self.keymap.bind_combo(
             ['e', 'b'],
             ['Export', 'BibTeX'],
             self.export_bibtex
         )
+        self.keymap.bind_combo(
+            ['p', 'a'],
+            ['Populate record', 'ADS'],
+            lambda: self.populate('ads')
+        )
+        self.keymap.bind_combo(
+            ['p', 'x'],
+            ['Populate record', 'arXiv'],
+            lambda: self.populate('arxiv')
+        )
+        self.keymap.bind('m', 'Toggle mark', self.mark)
+        self.keymap.bind('M', 'Mark all', self.mark_all)
 
         if vim_keys:
             self.keymap.bind('l', 'Focus details', self.focus_details)
@@ -303,6 +322,75 @@ class ListView(u.WidgetWrap):
             'refs.bib',
             write_bibtex
         )
+
+
+    def populate(self, database):
+        """Populate record with new data using `database`.
+
+        database : str
+        """
+
+        try:
+            if database not in scraper_constructors:
+                self.messenger.send_error(f'Database `{database}` not supported.')
+
+            constructor = scraper_constructors[database]
+
+            for widget in self.get_marks():
+                def scrape(replace_pdf, widget):
+                    widget_record = widget.content.record
+
+                    try:
+                        scraper = constructor(
+                            widget_record,
+                            self.config,
+                            self.messenger
+                        )
+
+                        record = scraper.create_record()
+
+                        update_entries = {}
+
+                        for key, value in record.record.items():
+                            key_redundant = key in widget_record and widget_record[key]
+                            key_redundant = key_redundant and not (
+                                key == 'journal' and widget_record['journal'] == 'arXiv e-prints'
+                            )
+
+                            if value and not key_redundant:
+                                update_entries[key] = value
+
+                        if replace_pdf == 'y':
+                            record.download_pdf(scraper)
+                            update_entries['path'] = record.record['path']
+
+                        self.library.update(
+                            widget_record['record_id'],
+                            update_entries
+                        )
+                        self.library.commit()
+
+                        widget.content.record = {**widget_record, **update_entries}
+                        u.emit_signal(self, 'show_details', widget.content)
+
+                        self.messenger.send_success('Populated record.')
+                    except AppMessengerError:
+                        pass
+
+                widget_record = widget.content.record
+
+                if 'path' in widget_record and widget_record['path']:
+                    self.messenger.ask_input(
+                        'Replace PDF with newer version if available? (y/...) ',
+                        '',
+                        scrape,
+                        widget
+                    )
+                else:
+                    scrape('y', widget)
+
+        except AppMessengerError:
+            pass
 
 
     def set_data(self, records):

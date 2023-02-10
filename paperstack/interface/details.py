@@ -1,8 +1,9 @@
 "Module reponsible for the details panel."
 
-import urwid as u
-
 import re
+
+import urwid as u
+import pyperclip
 
 from paperstack.interface.keymap import Keymap
 from paperstack.interface.util import clean_text
@@ -139,6 +140,7 @@ class DetailView(u.WidgetWrap):
             self.keymap.bind('up', 'Previous', self.focus_previous)
 
         self.keymap.bind('e', 'Edit entry', self.edit_entry)
+        self.keymap.bind('c', 'Copy entry', self.copy_entry)
 
         self.keymap.bind('g', 'First', self.focus_first)
         self.keymap.bind('G', 'Last', self.focus_last)
@@ -316,3 +318,15 @@ class DetailView(u.WidgetWrap):
             value,
             commit_edit
         )
+
+
+    def copy_entry(self):
+        "Copy currently selected entry."
+
+        widget, _ = self.walker.get_focus()
+
+        pyperclip.copy(
+            self.record.record[widget.content[0]]
+        )
+
+        self.messenger.send_success('Copied entry to clipboard.')

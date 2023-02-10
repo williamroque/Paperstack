@@ -11,6 +11,7 @@ import requests
 import bibtexparser
 
 from paperstack.data.record import record_constructors
+from paperstack.interface.util import clean_text
 
 
 class Scraper:
@@ -138,15 +139,15 @@ class ADSScraper(Scraper):
         ADS.
         """
 
-        if 'bibcode' in self.record:
+        if 'bibcode' in self.record and self.record['bibcode']:
             bibcode = self.record['bibcode']
-            identifier = f'bibcode:{bibcode}'
-        elif 'doi' in self.record:
+            identifier = f'bibcode:"{bibcode}"'
+        elif 'doi' in self.record and self.record['doi']:
             doi = self.record['doi']
-            identifier = f'doi:{doi}'
-        elif 'title' in self.record:
+            identifier = f'doi:"{doi}"'
+        elif 'title' in self.record and self.record['title']:
             title = self.record['title']
-            identifier = f'title:{title}'
+            identifier = f'title:"{title}"'
         else:
             self.messenger.send_error('Bibcode, DOI, or title is needed to scrape with ADS.')
 
@@ -291,19 +292,19 @@ class ArXivScraper(Scraper):
     def scrape(self):
         arxiv = None
 
-        if 'arxiv' in self.record:
+        if 'arxiv' in self.record and self.record['arxiv']:
             arxiv = self.record['arxiv'].strip()
 
-            id_match = re.search(r'[0-9vV]+\.?[0-9vV]+$', arxiv)
+            id_match = re.search(r'([0-9]+\.?[0-9]+)([vV0-9]*)$', arxiv)
 
             if not id_match:
                 self.messenger.send_error('Invalid arXiv ID.')
 
-            arxiv = id_match.group(0)
+            arxiv = id_match.group(1)
 
             identifier = f'id:{arxiv}'
         elif 'title' in self.record:
-            title = self.record['title']
+            title = clean_text(self.record['title'])
             identifier = f'ti:{title}'
         else:
             self.messenger.send_error('arXiv ID or title is needed to scrape with arXiv.')
@@ -350,8 +351,6 @@ class ArXivScraper(Scraper):
                 entry.find('{http://www.w3.org/2005/Atom}id').text.strip()
             )
 
-            print(entry.find('{http://www.w3.org/2005/Atom}id').text.strip())
-
             if id_match:
                 arxiv = id_match.group(0)
 
@@ -384,7 +383,7 @@ class ArXivScraper(Scraper):
             'record_type': 'article',
             'author': authors,
             'title': title,
-            'journal': 'arXiv',
+            'journal': 'arXiv e-prints',
             'year': str(date.year),
             'month': str(date.month),
             'doi': doi,

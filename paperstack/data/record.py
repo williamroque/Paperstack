@@ -177,6 +177,7 @@ class Record:
         as required and constraints can be placed based on type and pattern
         matching.
         """
+        return
 
         for requirement in self.requirements:
             field, _, field_type, required, pattern = requirement

@@ -55,7 +55,13 @@ class App:
             ('tag', 'black', 'light blue')
         }
 
-        size = u.raw_display.Screen().get_cols_rows()
+        screen = u.raw_display.Screen()
+
+        screen.tty_signal_keys(
+            'undefined','undefined', 'undefined','undefined','undefined'
+        )
+
+        size = screen.get_cols_rows()
         width = size[0] - 2
         height = size[1] - 2
 
@@ -74,6 +80,7 @@ class App:
         vim_keys = self.config.get('keys', 'vim-bindings') == 'yes'
 
         self.list_view = ListView(
+            self.config,
             self.messenger,
             self.library,
             self.keymap,

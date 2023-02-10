@@ -1,2 +1,0 @@
-urwid==2.1.2
-bibtexparser==1.4.0

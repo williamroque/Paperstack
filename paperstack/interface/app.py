@@ -61,29 +61,21 @@ class App:
         width_threshold = 70
 
         if width < width_threshold:
-            list_width = width
-            detail_width = width
-
             list_height = height * list_ratio // 100 - 2
             detail_height = height * detail_ratio // 100 - 2
         else:
-            list_width = width * list_ratio // 100 - 2
-            detail_width = width * detail_ratio // 100 - 2
-
             list_height = height
             detail_height = height
 
         vim_keys = self.config.get('keys', 'vim-bindings') == 'yes'
 
         self.list_view = ListView(
-            list_width,
             self.messenger,
             self.library,
             self.keymap,
             vim_keys
         )
         self.detail_view = DetailView(
-            detail_width,
             self.messenger,
             self.library,
             self.keymap,

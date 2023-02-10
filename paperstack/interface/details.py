@@ -14,12 +14,10 @@ class EntryElement(u.WidgetWrap):
     field_name : str
     name : str
     value : any
-    width : int
-        Panel width.
     keymap : paperstack.interface.keymap.Keymap
     """
 
-    def __init__ (self, field_name, name, value, width, keymap):
+    def __init__ (self, field_name, name, value, keymap):
         self.content = (field_name, name)
 
         self.keymap = keymap
@@ -38,7 +36,7 @@ class EntryElement(u.WidgetWrap):
             'entry_selected'
         )
 
-        super().__init__(u.Padding(self.text_wrapper, 'center', width - 2))
+        super().__init__(u.Padding(self.text_wrapper, 'center', ('relative', 90)))
 
 
     def keypress(self, size, key):
@@ -75,8 +73,6 @@ class DetailView(u.WidgetWrap):
 
     Parameters
     ----------
-    width : int
-        Panel width.
     messenger : paperstack.interface.message.AppMessenger
     library : paperstack.data.library.Library
     global_keymap : paperstack.interface.keymap.Keymap
@@ -84,8 +80,6 @@ class DetailView(u.WidgetWrap):
 
     Attributes
     ----------
-    width : int
-        Panel width.
     messenger : paperstack.interface.message.AppMessenger
     library : paperstack.data.library.Library
     keymap : paperstack.interface.keymap.Keymap
@@ -93,8 +87,7 @@ class DetailView(u.WidgetWrap):
     record : paperstack.data.record.Record
     """
 
-    def __init__(self, width, messenger, library, global_keymap, vim_keys):
-        self.width = width
+    def __init__(self, messenger, library, global_keymap, vim_keys):
         self.messenger = messenger
         self.library = library
         self.keymap = Keymap(messenger, global_keymap)
@@ -226,7 +219,6 @@ class DetailView(u.WidgetWrap):
                 key,
                 name,
                 value,
-                self.width,
                 self.keymap
             ))
 

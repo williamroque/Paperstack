@@ -17,8 +17,6 @@ class RecordElement(u.WidgetWrap):
     Parameters
     ----------
     record : paperstack.data.record.Record
-    width : int
-        Panel width.
     keymap : paperstack.interface.keymap.Keymap
 
     Attributes
@@ -27,7 +25,7 @@ class RecordElement(u.WidgetWrap):
     keymap : paperstack.interface.keymap.Keymap
     """
 
-    def __init__ (self, record, width, keymap):
+    def __init__ (self, record, keymap):
         self.content = record
 
         title = clean_text(record.record['title'])
@@ -41,7 +39,7 @@ class RecordElement(u.WidgetWrap):
 
         self.keymap = keymap
 
-        super().__init__(u.Padding(self.text_wrapper, 'center', width - 1))
+        super().__init__(u.Padding(self.text_wrapper, 'center', ('relative', 90)))
 
 
     def keypress(self, size, key):
@@ -60,8 +58,6 @@ class ListView(u.WidgetWrap):
 
     Parameters
     ----------
-    width : int
-        Panel width.
     messenger : paperstack.interface.message.AppMessenger
     library : paperstack.data.library.Library
     global_keymap : paperstack.interface.keymap.Keymap
@@ -69,8 +65,6 @@ class ListView(u.WidgetWrap):
 
     Attributes
     ----------
-    width : int
-        Panel width.
     messenger : paperstack.interface.message.AppMessenger
     library : paperstack.data.library.Library
     keymap : paperstack.interface.keymap.Keymap
@@ -83,8 +77,7 @@ class ListView(u.WidgetWrap):
         Currently selected records (actions on multiple records at a time).
     """
 
-    def __init__(self, width, messenger, library, global_keymap, vim_keys):
-        self.width = width
+    def __init__(self, messenger, library, global_keymap, vim_keys):
         self.messenger = messenger
         self.library = library
         self.keymap = Keymap(messenger, global_keymap)
@@ -319,7 +312,6 @@ class ListView(u.WidgetWrap):
 
         widgets = [RecordElement(
             record,
-            self.width,
             self.keymap
         ) for record in records]
 

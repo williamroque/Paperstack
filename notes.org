@@ -23,6 +23,7 @@
 - Add websites and books to library as well
 - Show only a few special columns in table
   - When searching, show and highlight columns being searched
+- Check to see if new versions of paper are available automatically
 
 * Roadmap [63%]
 

@@ -141,11 +141,11 @@ class AppMessenger:
 
             if self.app.text_mode:
                 self.app.footer_container.original_widget.set_text(
-                    str(message)
+                    ' ' + str(message)
                 )
             else:
                 self.app.footer_container.original_widget = u.AttrWrap(
-                    u.Text(str(message)),
+                    u.Text(' ' + str(message)),
                     'footer'
                 )
                 self.app.text_mode = True
@@ -170,11 +170,11 @@ class AppMessenger:
 
             if self.app.text_mode:
                 self.app.footer_container.original_widget.set_text(
-                    f'Error: {message}'
+                    f' Error: {message}'
                 )
             else:
                 self.app.footer_container.original_widget = u.AttrWrap(
-                    u.Text(f'Error: {message}'),
+                    u.Text(f' Error: {message}'),
                     'footer'
                 )
                 self.app.text_mode = True
@@ -200,11 +200,11 @@ class AppMessenger:
 
             if self.app.text_mode:
                 self.app.footer_container.original_widget.set_text(
-                    f'Warning: {message}'
+                    f' Warning: {message}'
                 )
             else:
                 self.app.footer_container.original_widget = u.AttrWrap(
-                    u.Text(f'Warning: {message}'),
+                    u.Text(f' Warning: {message}'),
                     'footer'
                 )
                 self.app.text_mode = True
@@ -228,11 +228,11 @@ class AppMessenger:
 
             if self.app.text_mode:
                 self.app.footer_container.original_widget.set_text(
-                    f'Success: {message}'
+                    f' Success: {message}'
                 )
             else:
                 self.app.footer_container.original_widget = u.AttrWrap(
-                    u.Text(f'Success: {message}'),
+                    u.Text(f' Success: {message}'),
                     'footer'
                 )
                 self.app.text_mode = True

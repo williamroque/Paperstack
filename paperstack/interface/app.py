@@ -279,6 +279,8 @@ class App:
                         self.update_data(
                             self.library.filter([])
                         )
+
+                        self.messenger.send_success('Added record.')
                     except AppMessengerError:
                         pass
 
@@ -332,6 +334,8 @@ class App:
                         self.update_data(
                             self.library.filter([])
                         )
+
+                        self.messenger.send_success('Added record.')
                     except AppMessengerError:
                         pass
 

@@ -1,6 +1,7 @@
 "Module responsible for the list panel."
 
 from pathlib import Path
+import os
 
 import urwid as u
 
@@ -78,6 +79,8 @@ class ListView(u.WidgetWrap):
     has_focus : bool
     previous_widget : urwid.Widget
         Keep track of last widget with focus.
+    marks : set
+        Currently selected records (actions on multiple records at a time).
     """
 
     def __init__(self, width, messenger, library, global_keymap, vim_keys):
@@ -89,12 +92,16 @@ class ListView(u.WidgetWrap):
         self.has_focus = False
         self.previous_widget = None
 
+        self.marks = set()
+
         self.keymap.bind_combo(
             ['d', 'y'],
             ['Delete record', 'Confirm'],
             self.remove_record
         )
         self.keymap.bind('o', 'Open PDF', self.open_pdf)
+        self.keymap.bind('m', 'Toggle mark', self.mark)
+        self.keymap.bind('a', 'Mark all', self.mark_all)
         self.keymap.bind_combo(
             ['e', 'b'],
             ['Export', 'BibTeX'],
@@ -150,13 +157,29 @@ class ListView(u.WidgetWrap):
         u.emit_signal(self, 'focus_details')
 
 
-    def focus_previous(self):
-        "Move focus to previous record."
+    def focus_previous(self, exclude=None):
+        """Move focus to previous record.
+
+        Parameters
+        ----------
+        exclude : set
+            Exclude set of widgets, which may be deleted.
+        """
 
         try:
+            widget, index = self.walker.get_focus()
+
             self.walker.set_focus(
-                self.walker.prev_position(self.walker.get_focus()[1])
+                self.walker.prev_position(index)
             )
+
+            while exclude and widget in exclude:
+                widget, index = self.walker.get_focus()
+
+                self.walker.set_focus(
+                    self.walker.prev_position(index)
+                )
+
         except IndexError:
             pass
 
@@ -172,55 +195,112 @@ class ListView(u.WidgetWrap):
             pass
 
 
+    def get_marks(self):
+        """Get marked and currently selected widgets.
+
+        Returns
+        -------
+        set
+        """
+
+        widget, _ = self.walker.get_focus()
+
+        return {widget} | self.marks
+
+
     def remove_record(self):
         "Remove record from database."
 
-        widget, index = self.walker.get_focus()
+        marks = self.get_marks()
 
-        self.focus_previous()
+        self.focus_previous(marks)
 
-        record_id = widget.content.record['record_id']
+        for widget in marks:
+            record = widget.content.record
 
-        self.library.remove(record_id)
-        self.library.commit()
+            record_id = record['record_id']
 
-        del self.walker[index]
+            if 'path' in record and record['path']:
+                os.remove(record['path'])
+
+            self.library.remove(record_id)
+            self.library.commit()
+
+            index = self.walker.index(widget)
+
+            del self.walker[index]
+
+            if widget in self.marks:
+                self.marks.remove(widget)
+
+            self.messenger.send_success('Removed item(s).')
 
 
     def open_pdf(self):
         "Open PDF corresponding to record from database."
 
+        marks = self.get_marks()
+
+        for widget in marks:
+            record = widget.content.record
+
+            if 'path' in record and record['path']:
+                path = Path(record['path'])
+
+                if path.is_file():
+                    try:
+                        open_path(str(path.absolute()))
+                    except Exception:
+                        self.messenger.send_warning('Could not open PDF in preferred application.')
+                else:
+                    self.messenger.send_warning('Specified path does not exist.')
+            else:
+                self.messenger.send_warning('No PDF path specified.')
+
+
+    def mark(self):
+        "Toggle mark for current record (used by other actions later)."
+
         widget, index = self.walker.get_focus()
 
-        record = widget.content.record
-
-        if 'path' in record and record['path']:
-            path = Path(record['path'])
-
-            if path.is_file():
-                try:
-                    open_path(str(path.absolute()))
-                except Exception:
-                    self.messenger.send_warning('Could not open PDF in preferred application.')
-            else:
-                self.messenger.send_warning('Specified path does not exist.')
+        if widget in self.marks:
+            self.marks.remove(widget)
+            widget.text_wrapper.set_attr('record')
         else:
-            self.messenger.send_warning('No PDF path specified.')
+            self.marks.add(widget)
+            widget.text_wrapper.set_attr('entry_name')
+
+        self.focus_next()
+
+
+    def mark_all(self):
+        "Toggle marks for all records."
+
+        for widget in self.walker:
+            if widget in self.marks:
+                self.marks.remove(widget)
+                widget.text_wrapper.set_attr('record')
+            else:
+                self.marks.add(widget)
+                widget.text_wrapper.set_attr('entry_name')
+
 
 
     def export_bibtex(self):
         "Export current record to BibTeX and write to specified path."
 
-        widget, index = self.walker.get_focus()
-
-        text = widget.content.to_bibtex()
+        marks = self.get_marks()
 
         def write_bibtex(path):
             bibtex_file = File(path)
             bibtex_file.ensure()
 
             with open(bibtex_file.path, 'w') as f:
-                f.write(text)
+                for widget in marks:
+                    text = widget.content.to_bibtex()
+                    f.write(text)
+
+            self.messenger.send_success('Exported BibTeX file.')
 
         self.messenger.ask_input(
             'Export path: ',

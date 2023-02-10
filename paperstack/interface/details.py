@@ -114,6 +114,9 @@ class DetailView(u.WidgetWrap):
 
         self.keymap.bind('e', 'Edit entry', self.edit_entry)
 
+        self.keymap.bind('g', 'First', self.focus_first)
+        self.keymap.bind('G', 'Last', self.focus_last)
+
         u.register_signal(self.__class__, ['focus_list'])
 
         self.walker = u.SimpleFocusListWalker([])
@@ -138,7 +141,7 @@ class DetailView(u.WidgetWrap):
 
 
     def focus_previous(self):
-        "Move focus to previous record."
+        "Move focus to previous entry."
 
         try:
             while True:
@@ -155,7 +158,7 @@ class DetailView(u.WidgetWrap):
 
 
     def focus_next(self):
-        "Move focus to next record."
+        "Move focus to next entry."
 
         try:
             while True:
@@ -167,6 +170,24 @@ class DetailView(u.WidgetWrap):
 
                 if self.walker.get_focus()[0].selectable():
                     break
+        except IndexError:
+            pass
+
+
+    def focus_first(self):
+        "Move focus to first entry."
+
+        try:
+            self.walker.set_focus(0)
+        except IndexError:
+            pass
+
+
+    def focus_last(self):
+        "Move focus to last entry."
+
+        try:
+            self.walker.set_focus(len(self.walker) - 1)
         except IndexError:
             pass
 
@@ -241,6 +262,8 @@ class DetailView(u.WidgetWrap):
             widget.text.set_text([
                 ('entry_name', f'{name}: '), clean_text(text)
             ])
+
+            self.messenger.send_success('Edited entry.')
 
         if field_name in self.record.record and self.record.record[field_name]:
             value = self.record.record[field_name]

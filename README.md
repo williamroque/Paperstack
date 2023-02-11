@@ -41,9 +41,9 @@ paperstack --help
 
 Run `paperstack` by itself to open the interactive text-based interface. There, the left panel lists the records in your library (use arrow keys to navigate) and the right panel shows record details. Below, the footer displays key map hints and other messages.
 
-<center>
-<img src="https://raw.githubusercontent.com/williamroque/Paperstack/main/screenshot_1.png" width="600">
-</center>
+<p align="center">
+<img src="https://raw.githubusercontent.com/williamroque/Paperstack/main/screenshot_1.png" width="800">
+</p>
 
 There is also a command-line interface, which can be useful for batch actions and integration with other programs. For example, run the command
 

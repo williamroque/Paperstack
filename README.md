@@ -39,7 +39,13 @@ paperstack --help
 
 ## Usage
 
-The program can be used both through the CLI and an interactive text-based interface. Try running
+Run `paperstack` by itself to open the interactive text-based interface. There, the left panel lists the records in your library (use arrow keys to navigate) and the right panel shows record details. Below, the footer displays key map hints and other messages.
+
+<center>
+<img src="https://raw.githubusercontent.com/williamroque/Paperstack/main/screenshot_1.png" width="600">
+</center>
+
+There is also a command-line interface, which can be useful for batch actions and integration with other programs. For example, run the command
 
 ```sh
 paperstack add article 'author: Albert Einstein; title: Die Grundlage der allgemeinen Relativitätstheorie; journal: AdP; year: 1916'
@@ -51,7 +57,13 @@ to add a new paper. Note the syntax for entries (`key1: value1; key2: value2`). 
 paperstack list
 ```
 
-to list all added records in the library. To open the interactive interface, run `paperstack` by itself.
+to list all added records in the library. A slightly less trivial use case might be to scrape multiple articles at once. The following script reads a list of bibcodes from a text file and uses Paperstack to add them to your library.
+
+```sh
+for line in $(cat bibcodes.txt); do
+    paperstack scrape ads "bibcode: $line" --add
+done
+```
 
 Configuration for Paperstack goes in `$HOME/.paperstack.cfg`. The config file follows a standard similar to Windows `.ini` files. Sections are labeled with `[section name]` and settings are written as `key = value`. Check the documentation for the different settings you can customize. Below is an example configuration.
 

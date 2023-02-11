@@ -107,6 +107,10 @@ class AppMessenger:
         If true, print with special colors using ANSI escape sequences.
     editor_command : str
         The command to use for editing long text.
+    input_active : list
+        Whether currently accepting input.
+    input_buffer : list
+        Keep track of ask_input requests.
     """
 
     def __init__(self, ansi_colors=True):
@@ -114,6 +118,9 @@ class AppMessenger:
 
         self.ansi_colors = ansi_colors
         self.editor_command = 'vi'
+
+        self.input_active = False
+        self.input_buffer = []
 
 
     def connect_app(self, app):
@@ -251,6 +258,14 @@ class AppMessenger:
         callback_args : list
         """
 
+        if self.input_active:
+            self.input_buffer.append(
+                (prompt, default, callback, *callback_args)
+            )
+            return
+
+        self.input_active = True
+
         if self.app is None:
             raise AppMessengerError
 
@@ -273,6 +288,11 @@ class AppMessenger:
             u.disconnect_signal(self.app, 'escape', escape)
             u.disconnect_signal(self.app, 'ctrl-e', switch_editor)
 
+            self.input_active = False
+
+            if len(self.input_buffer) > 0:
+                self.ask_input(*self.input_buffer.pop(0))
+
         u.connect_signal(self.app, 'escape', escape)
 
         def enter(_):
@@ -290,6 +310,11 @@ class AppMessenger:
             u.disconnect_signal(self.app, 'ctrl-e', switch_editor)
 
             callback(text, *callback_args)
+
+            self.input_active = False
+
+            if len(self.input_buffer) > 0:
+                self.ask_input(*self.input_buffer.pop(0))
 
         u.connect_signal(self.app, 'enter', enter)
 

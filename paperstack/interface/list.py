@@ -3,8 +3,6 @@
 from pathlib import Path
 import os
 
-from copy import copy
-
 import urwid as u
 
 from paperstack.interface.keymap import Keymap
@@ -234,7 +232,11 @@ class ListView(u.WidgetWrap):
 
             if 'path' in record and record['path']:
                 try:
-                    os.remove(record['path'])
+                    path = File(
+                        self.config.get('paths', 'data'), True
+                    ).join(record['path'])
+
+                    os.remove(path)
                 except FileNotFoundError:
                     pass
 
@@ -260,7 +262,9 @@ class ListView(u.WidgetWrap):
             record = widget.content.record
 
             if 'path' in record and record['path']:
-                path = Path(record['path'])
+                path = File(
+                    self.config.get('paths', 'data'), True
+                ).join(record['path'])
 
                 if path.is_file():
                     try:

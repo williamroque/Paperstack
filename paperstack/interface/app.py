@@ -1,8 +1,15 @@
 "This is where the 'graphical' interface magic happens."
 
 from copy import copy
+import re
+
+import fitz
+
+import os
 
 import urwid as u
+
+from paperstack.filesystem.file import File
 
 from paperstack.interface.keymap import Keymap
 from paperstack.interface.message import AppMessengerError
@@ -260,7 +267,7 @@ class App:
         self.frame.set_focus('footer')
 
 
-    def add_manual(self, record_type):
+    def add_manual(self, record_type, **entries):
         "Add record type manually."
 
         try:
@@ -268,9 +275,9 @@ class App:
                 self.messenger.send_error(f'Record type `{record_type}` does not exist.')
 
             constructor = record_constructors[record_type]
-            record = constructor({}, self.config, self.messenger, True)
+            record = constructor(entries, self.config, self.messenger, True)
 
-            ignore_fields = ('record_id', 'path')
+            ignore_fields = ('record_id', 'path') + tuple(entries.keys())
 
             requirements = []
 
@@ -316,12 +323,14 @@ class App:
             pass
 
 
-    def add_scraped(self, database):
+    def add_scraped(self, database, **entries):
         """Scrape database using information provided by input..
 
         Parameters
         ----------
         database : str
+        entries : dict
+            All entries that are pre-established.
         """
 
         try:
@@ -329,9 +338,30 @@ class App:
                 self.messenger.send_error(f'Database `{database}` not supported.')
 
             constructor = scraper_constructors[database]
-            scraper = constructor({}, self.config, self.messenger)
+            scraper = constructor(entries, self.config, self.messenger)
 
-            suggested_fields = copy(scraper.suggested_fields)
+            if len(entries) == 0:
+                suggested_fields = copy(scraper.suggested_fields)
+            else:
+                suggested_fields = []
+
+            def scrape():
+                try:
+                    record = scraper.create_record()
+
+                    if 'path' not in entries:
+                        record.download_pdf(scraper)
+
+                    self.library.add(record)
+                    self.library.commit()
+
+                    self.update_data(
+                        self.library.filter([])
+                    )
+
+                    self.messenger.send_success('Added record.')
+                except AppMessengerError:
+                    pass
 
             def callback(text, field):
                 scraper.record[field[0]] = text
@@ -345,28 +375,18 @@ class App:
                         field
                     )
                 else:
-                    try:
-                        record = scraper.create_record()
-                        record.download_pdf(scraper)
+                    scrape()
 
-                        self.library.add(record)
-                        self.library.commit()
-
-                        self.update_data(
-                            self.library.filter([])
-                        )
-
-                        self.messenger.send_success('Added record.')
-                    except AppMessengerError:
-                        pass
-
-            field = suggested_fields.pop(0)
-            self.messenger.ask_input(
-                f'{field[1]}: ',
-                '',
-                callback,
-                field
-            )
+            if len(suggested_fields) > 0:
+                field = suggested_fields.pop(0)
+                self.messenger.ask_input(
+                    f'{field[1]}: ',
+                    '',
+                    callback,
+                    field
+                )
+            else:
+                scrape()
         except AppMessengerError:
             pass
 
@@ -388,4 +408,61 @@ class App:
         records = self.library.filter([])
 
         self.update_data(records)
+
+        record_paths = set(record.record['path'] for record in records)
+        data_paths = os.listdir(File(
+            self.config.get('paths', 'data'), True
+        ).path)
+
+        def handle_add(scrape, path):
+            if scrape == 'y':
+                absolute_path = File(
+                    self.config.get('paths', 'data'), True
+                ).join(path)
+
+                doc = fitz.open(absolute_path)
+
+                for page in doc:
+                    doi = re.search(
+                        r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/(?:(?!["&\'<>])\S)+)\b',
+                        page.get_text()
+                    )
+
+                    if doi:
+                        self.add_scraped('ads', doi = doi.group(0), path = path)
+                        break
+            else:
+                self.add_manual('article', path = path)
+
+        def handle_file(option, path):
+            if option == 'a':
+                self.messenger.ask_input(
+                    'Scrape using ADS? (y/...) ',
+                    '',
+                    handle_add,
+                    path
+                )
+            elif option == 'd':
+                try:
+                    absolute_path = File(
+                        self.config.get('paths', 'data'), True
+                    ).join(path)
+
+                    os.remove(absolute_path)
+
+                    self.messenger.send_success('Deleted file.')
+                except:
+                    self.messenger.send_warning('Unable to delete file.')
+
+        for path in data_paths:
+            if path.endswith('.pdf') and path not in record_paths:
+                self.messenger.ask_input(
+                    'Unrecognized file `{}`. Add to library, delete, or ignore? (a/d/...) '.format(
+                        path[:17] + '...' if len(path) > 20 else path
+                    ),
+                    '',
+                    handle_file,
+                    path
+                )
+
         self.loop.run()

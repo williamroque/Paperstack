@@ -10,6 +10,8 @@ import requests
 
 import bibtexparser
 
+from paperstack.filesystem.file import File
+
 from paperstack.data.record import record_constructors
 from paperstack.interface.util import clean_text
 
@@ -233,6 +235,9 @@ class ADSScraper(Scraper):
         if 'abstract' in metadata:
             record['abstract'] = metadata['abstract']
 
+        if 'path' in self.record:
+            record['path'] = self.record['path']
+
         self.record = record
 
 
@@ -271,7 +276,11 @@ class ADSScraper(Scraper):
             return
 
         try:
-            with open(save_path, 'wb') as f:
+            absolute_path = File(
+                self.config.get('paths', 'data'), True
+            ).join(save_path)
+
+            with open(absolute_path, 'wb') as f:
                 f.write(response.content)
         except:
             self.messenger.send_warning('Could not write PDF to data directory.')
@@ -414,7 +423,11 @@ class ArXivScraper(Scraper):
             return
 
         try:
-            with open(save_path, 'wb') as f:
+            absolute_path = File(
+                self.config.get('paths', 'data'), True
+            ).join(save_path)
+
+            with open(absolute_path, 'wb') as f:
                 f.write(response.content)
         except:
             self.messenger.send_warning('Could not write PDF to data directory.')

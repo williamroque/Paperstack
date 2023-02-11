@@ -279,12 +279,9 @@ class Record:
         scraper : paperstack.data.scraper.Scraper
         """
 
-        data_path = File(self.config.get('paths', 'data'), True)
-        save_path = data_path.join(
+        scraper.download_pdf(
             '{}.pdf'.format(self.record['record_id'])
         )
-
-        scraper.download_pdf(save_path)
 
         if 'path' in scraper.record and scraper.record['path']:
             self.record['path'] = scraper.record['path']

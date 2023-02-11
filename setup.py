@@ -9,7 +9,7 @@ def readme():
 
 setup(
     name='paperstack',
-    version='1.1.1',
+    version='1.1.2',
     description='A powerful, lightweight, universal bibliography management tool',
     long_description=readme(),
     long_description_content_type='text/markdown',
@@ -31,6 +31,6 @@ setup(
     ],
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['requests', 'bibtexparser', 'urwid', 'pyperclip'],
+    install_requires=['requests', 'bibtexparser', 'urwid', 'pyperclip', 'pymupdf'],
     scripts = ['bin/paperstack'],
 )

@@ -6,11 +6,16 @@ import os
 from paperstack.data.library import Library
 from paperstack.data.record import record_constructors
 from paperstack.data.scraper import scraper_constructors
+
 from paperstack.filesystem.config import Config
+from paperstack.filesystem.file import File
+
 from paperstack.interface.message import Messenger
 from paperstack.interface.message import AppMessenger
+
 from paperstack.utility import parse_dict
 from paperstack.utility import open_path
+
 from paperstack.interface.app import App
 
 
@@ -80,8 +85,12 @@ def remove_record(args):
     record = library.get(args.id)
 
     if 'path' in record.record and record.record['path']:
+        path = File(
+            config.get('paths', 'data'), True
+        ).join(record.record['path'])
+
         try:
-            os.remove(record.record['path'])
+            os.remove(path)
         except FileNotFoundError:
             pass
 
@@ -137,7 +146,9 @@ def open_record(args):
     if not 'path' in record.record or not record.record['path']:
         messenger.send_error(f'No path specified in record.')
 
-    path = record.record['path']
+    path = File(
+        config.get('paths', 'data'), True
+    ).join(record.record['path'])
 
     try:
         open_path(path)

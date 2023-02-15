@@ -1,5 +1,5 @@
 <h1 align="center">
-<img src="https://raw.githubusercontent.com/williamroque/Paperstack/main/logo.svg" width="600">
+<img src="https://raw.githubusercontent.com/williamroque/Paperstack/main/assets/logo.svg" width="600">
 </h1><br>
 
 [![PyPI version](https://badge.fury.io/py/paperstack.svg)](https://badge.fury.io/py/paperstack) [![GitHub version](https://badge.fury.io/gh/williamroque%2FPaperstack.svg)](https://badge.fury.io/gh/williamroque%2FPaperstack)
@@ -42,7 +42,7 @@ paperstack --help
 Run `paperstack` by itself to open the interactive text-based interface. There, the left panel lists the records in your library (use arrow keys to navigate) and the right panel shows record details. Below, the footer displays key map hints and other messages.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/williamroque/Paperstack/main/screenshot_1.png" width="800">
+<img src="https://raw.githubusercontent.com/williamroque/Paperstack/main/assets/screenshot_1.png" width="800">
 </p>
 
 There is also a command-line interface, which can be useful for batch actions and integration with other programs. For example, run the command
@@ -89,6 +89,8 @@ command = nvim
 ```
 
 Note that to scrape ADS, a valid API key has to be specified in the config file.
+
+Find a presentation containing a few use cases and general information [here](https://raw.githubusercontent.com/williamroque/Paperstack/main/assets/Paperstack.pdf).
 
 ## Contributing
 

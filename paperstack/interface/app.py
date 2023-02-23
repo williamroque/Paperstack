@@ -50,6 +50,11 @@ class App:
             ['Add record', 'Scrape', 'arXiv'],
             lambda: self.add_scraped('arxiv')
         )
+        self.keymap.bind_combo(
+            ['a', 's', 'm'],
+            ['Add record', 'Scrape', 'MNRAS'],
+            lambda: self.add_scraped('mnras')
+        )
 
         self.palette = {
             ('bg', '', ''),

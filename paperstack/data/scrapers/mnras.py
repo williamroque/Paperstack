@@ -3,7 +3,7 @@
 import re
 import datetime
 
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urljoin
 
 import requests
 from bs4 import BeautifulSoup
@@ -54,6 +54,8 @@ class MNRASScraper(Scraper):
         except requests.Timeout:
             self.messenger.send_error('Request timed out while connecting to MNRAS.')
 
+        url = response.url
+
         soup = BeautifulSoup(response.content, 'html.parser')
 
         try:
@@ -70,32 +72,41 @@ class MNRASScraper(Scraper):
             date = datetime.datetime.strptime(
                 date.text, '%d %B %Y'
             )
-        except:
-            self.messenger.send_error('Cannot extract all necessary information from MNRAS.')
 
-        entries = [
-            ('record_type', 'ENTRYTYPE'),
-            ('author', 'author'),
-            ('title', 'title'),
-            ('journal', 'journal'),
-            ('year', 'year'),
-            ('volume', 'volume'),
-            ('number', 'number'),
-            ('pages', 'pages'),
-            ('month', 'month'),
-            ('doi', 'doi'),
-            ('issn', 'issn')
-        ]
+            citation = soup.find('div', {'class': 'ww-citation-primary'})
+
+            volume, issue, pages, doi = re.search(
+                'Volume (\d+), Issue (\d+).*Pages (.*), (.*)',
+                citation.text
+            ).groups()
+
+            doi = re.search(
+                r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/(?:(?!["&\'<>])\S)+)\b',
+                doi
+            ).group()
+        except:
+            self.messenger.send_error('Cannot extract all necessary information from MNRAS. May have reached CAPTCHA.')
+
+        try:
+            self.pdf_url = urljoin(
+                url,
+                soup.find('a', {'class': 'article-pdfLink'})['href']
+            )
+        except:
+            pass
 
         record = {
+            'record_type': 'article',
             'author': author,
             'title': title,
             'journal': 'Monthly Notices of the Royal Astronomical Society',
-            'year': date.year,
-            'month': date.strftime('%B')
+            'year': str(date.year),
+            'month': date.strftime('%B'),
+            'volume': volume,
+            'number': issue,
+            'pages': pages,
+            'doi': doi
         }
-
-        print(record)
 
         self.record = record
 
@@ -111,14 +122,21 @@ class MNRASScraper(Scraper):
         try:
             response = requests.get(
                 url,
-                timeout = float(self.config.get('mnras', 'timeout')),
+                headers = {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Max-Age': '3600',
+                    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'
+                },
+                timeout = float(self.config.get('mnras', 'timeout'))
             )
+
+            return response
         except requests.ConnectionError:
             self.messenger.send_warning('Having trouble connecting to MNRAS.')
         except requests.Timeout:
             self.messenger.send_warning('Request timed out while connecting to MNRAS.')
-
-        return response
 
 
     def download_pdf(self, save_path):
@@ -126,12 +144,10 @@ class MNRASScraper(Scraper):
             self.messenger.send_warning('Not enough information to download PDF.')
             return
 
-        response = self.attempt_get(self.pdf_url + 'PUB_PDF')
+        response = self.attempt_get(self.pdf_url)
 
         if not response or not response.ok:
-            response = self.attempt_get(self.pdf_url + 'EPRINT_PDF')
-
-        if not response or not response.ok:
+            self.messenger.send_warning('Could not retrieve PDF.')
             return
 
         try:

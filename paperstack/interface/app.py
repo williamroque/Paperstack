@@ -14,7 +14,7 @@ from paperstack.filesystem.file import File
 from paperstack.interface.keymap import Keymap
 from paperstack.interface.message import AppMessengerError
 from paperstack.data.record import record_constructors
-from paperstack.data.scraper import scraper_constructors
+from paperstack.data.scrapers import scraper_constructors
 
 from paperstack.interface.list import ListView
 from paperstack.interface.details import DetailView
@@ -191,6 +191,13 @@ class App:
 
     def filter_records(self):
         "Filter and display records."
+
+        for widget in self.list_view.walker:
+            if widget in self.list_view.marks:
+                self.list_view.marks.remove(widget)
+                widget.text_wrapper.set_attr('record')
+
+        self.list_view.marks.clear()
 
         def display(text):
             filters = list(parse_dict(text, 'title').items())

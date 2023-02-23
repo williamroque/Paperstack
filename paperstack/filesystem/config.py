@@ -20,6 +20,9 @@ DEFAULT_CONFIG = {
     'arxiv': {
         'timeout': 10
     },
+    'mnras': {
+        'timeout': 10
+    },
     'keys': {
         'vim-bindings': 'no'
     },

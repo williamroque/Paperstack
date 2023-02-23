@@ -5,7 +5,7 @@ import os
 
 from paperstack.data.library import Library
 from paperstack.data.record import record_constructors
-from paperstack.data.scraper import scraper_constructors
+from paperstack.data.scrapers import scraper_constructors
 
 from paperstack.filesystem.config import Config
 from paperstack.filesystem.file import File
@@ -354,7 +354,7 @@ def main():
     scrape_parser.add_argument(
         'database',
         type = str,
-        help = 'Which database to scrape from (ads/arxiv).'
+        help = 'Which database to scrape from (ads/arxiv/mnras).'
     )
 
     scrape_parser.add_argument(

@@ -7,7 +7,7 @@ import urwid as u
 
 from paperstack.interface.keymap import Keymap
 from paperstack.interface.util import clean_text
-from paperstack.data.scraper import scraper_constructors
+from paperstack.data.scrapers import scraper_constructors
 
 from paperstack.interface.message import AppMessengerError
 
@@ -302,7 +302,6 @@ class ListView(u.WidgetWrap):
             else:
                 self.marks.add(widget)
                 widget.text_wrapper.set_attr('record_marked')
-
 
 
     def export_bibtex(self):

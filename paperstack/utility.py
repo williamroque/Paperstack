@@ -1,6 +1,7 @@
 "Module containing various utility functions."
 
 import os
+import re
 import platform
 import subprocess
 
@@ -44,14 +45,12 @@ def parse_dict(raw, default_key=None):
     dict
     """
 
-    raw = raw.replace('https://', '')
-
     parsed_dict = {}
     entries = raw.split(';')
 
     for entry in entries:
         if ':' in entry:
-            items = entry.split(':')
+            items = re.split(r'(?<!https)(?<!http):', entry)
 
             if len(items) == 2:
                 key, value = items

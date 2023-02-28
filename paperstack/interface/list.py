@@ -14,8 +14,6 @@ from paperstack.interface.message import AppMessengerError
 from paperstack.utility import open_path
 from paperstack.filesystem.file import File
 
-from paperstack.utility import parse_dict
-
 
 class RecordElement(u.WidgetWrap):
     """The Widget corresponding to each record item.
@@ -105,7 +103,6 @@ class ListView(u.WidgetWrap):
             self.keymap.bind('down', 'Next', self.focus_next)
             self.keymap.bind('up', 'Previous', self.focus_previous)
 
-        self.keymap.bind('f', 'Filter', self.filter_records)
         self.keymap.bind_combo(
             ['d', 'y'],
             ['Delete record', 'Confirm'],
@@ -228,31 +225,6 @@ class ListView(u.WidgetWrap):
         widget, _ = self.walker.get_focus()
 
         return {widget} | self.marks
-
-
-    def filter_records(self):
-        "Filter and display records."
-
-        for widget in self.walker:
-            if widget in self.marks:
-                self.marks.remove(widget)
-                widget.text_wrapper.set_attr('record')
-
-        self.marks.clear()
-
-        def display(text):
-            filters = list(parse_dict(text, 'title').items())
-
-            try:
-                records = self.library.filter(filters)
-
-                u.emit_signal(self, 'update_data', records)
-            except AppMessengerError:
-                pass
-
-        self.messenger.ask_input(
-            'Filter: ', '', display
-        )
 
 
     def remove_record(self):

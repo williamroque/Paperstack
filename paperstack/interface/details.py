@@ -145,7 +145,7 @@ class DetailView(u.WidgetWrap):
         self.keymap.bind('g', 'First', self.focus_first)
         self.keymap.bind('G', 'Last', self.focus_last)
 
-        self.keymap.bind('/', 'Find', self.focus_find)
+        self.keymap.bind('f', 'Find entry', self.focus_find)
 
         u.register_signal(self.__class__, ['focus_list'])
 

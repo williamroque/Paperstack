@@ -33,8 +33,6 @@ class App:
 
         self.keymap.bind('q', 'Exit app', self.quit)
 
-        self.keymap.bind('f', 'Filter', self.filter_records)
-
         self.keymap.bind_combo(
             ['a', 'm', 'a'],
             ['Add record', 'Manually', 'Article'],
@@ -107,6 +105,7 @@ class App:
 
         u.connect_signal(self.list_view, 'show_details', self.show_details)
         u.connect_signal(self.list_view, 'focus_details', self.focus_details)
+        u.connect_signal(self.list_view, 'update_data', self.update_data)
 
         u.connect_signal(self.detail_view, 'focus_list', self.focus_list)
 
@@ -192,31 +191,6 @@ class App:
         "Quit app."
 
         raise u.ExitMainLoop()
-
-
-    def filter_records(self):
-        "Filter and display records."
-
-        for widget in self.list_view.walker:
-            if widget in self.list_view.marks:
-                self.list_view.marks.remove(widget)
-                widget.text_wrapper.set_attr('record')
-
-        self.list_view.marks.clear()
-
-        def display(text):
-            filters = list(parse_dict(text, 'title').items())
-
-            try:
-                records = self.library.filter(filters)
-
-                self.update_data(records)
-            except AppMessengerError:
-                pass
-
-        self.messenger.ask_input(
-            'Filter: ', '', display
-        )
 
 
     def unhandled_input(self, key):

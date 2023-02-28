@@ -27,7 +27,8 @@ DEFAULT_CONFIG = {
         'vim-bindings': 'no'
     },
     'editor': {
-        'command': 'vi'
+        'command': 'vi',
+        'extension': 'md'
     }
 }
 

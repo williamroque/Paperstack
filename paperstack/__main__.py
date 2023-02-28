@@ -403,6 +403,7 @@ def main():
         config = Config(messenger, args.config_path)
 
         messenger.editor_command = config.get('editor', 'command')
+        messenger.editor_extension = config.get('editor', 'extension')
 
         library = Library(config, messenger)
 

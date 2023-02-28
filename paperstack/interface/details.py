@@ -145,6 +145,8 @@ class DetailView(u.WidgetWrap):
         self.keymap.bind('g', 'First', self.focus_first)
         self.keymap.bind('G', 'Last', self.focus_last)
 
+        self.keymap.bind('/', 'Find', self.focus_find)
+
         u.register_signal(self.__class__, ['focus_list'])
 
         self.walker = u.SimpleFocusListWalker([])
@@ -218,6 +220,27 @@ class DetailView(u.WidgetWrap):
             self.walker.set_focus(len(self.walker) - 1)
         except IndexError:
             pass
+
+
+    def focus_find(self):
+        "Move focus to first entry with matching entry name."
+
+        def find(name):
+            name = name.strip().lower()
+
+            for i, widget in enumerate(self.walker):
+                if not isinstance(widget, EntryElement):
+                    continue
+
+                entry_name, *_ = widget.text.get_text()[0].split(':')
+                entry_name = entry_name.strip().lower()
+
+                if entry_name.startswith(name):
+                    self.walker.set_focus(i)
+                    break
+
+        self.messenger.ask_input('Entry name: ', '', find)
+
 
 
     def set_record(self, record):

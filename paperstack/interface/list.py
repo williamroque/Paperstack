@@ -115,6 +115,11 @@ class ListView(u.WidgetWrap):
             ['Populate record', 'arXiv'],
             lambda: self.populate('arxiv')
         )
+        self.keymap.bind_combo(
+            ['p', 'm'],
+            ['Populate record', 'MNRAS'],
+            lambda: self.populate('mnras')
+        )
         self.keymap.bind('m', 'Toggle mark', self.mark)
         self.keymap.bind('M', 'Mark all', self.mark_all)
 

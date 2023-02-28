@@ -107,6 +107,8 @@ class AppMessenger:
         If true, print with special colors using ANSI escape sequences.
     editor_command : str
         The command to use for editing long text.
+    editor_extension : str
+        The file extension to use for editing long text.
     input_active : list
         Whether currently accepting input.
     input_buffer : list
@@ -118,6 +120,7 @@ class AppMessenger:
 
         self.ansi_colors = ansi_colors
         self.editor_command = 'vi'
+        self.editor_extension = 'md'
 
         self.input_active = False
         self.input_buffer = []
@@ -321,7 +324,9 @@ class AppMessenger:
         def switch_editor(_):
             text = editor.get_edit_text()
 
-            fd, filename = tempfile.mkstemp(suffix='.tmp')
+            fd, filename = tempfile.mkstemp(
+                suffix=f'.{self.editor_extension}'
+            )
 
             os.close(fd)
 

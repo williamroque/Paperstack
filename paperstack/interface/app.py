@@ -61,7 +61,7 @@ class App:
             ('record', '', ''),
             ('record_selected', 'dark green', ''),
             ('record_marked', 'dark blue', ''),
-            ('entry_selected', 'underline', ''),
+            ('entry_selected', 'dark green', ''),
             ('entry_name', 'dark blue', ''),
             ('footer', '', ''),
             ('tag', 'black', 'light blue')

@@ -231,7 +231,7 @@ class App:
 
         if key == 'enter':
             u.emit_signal(self, 'enter', None)
-        elif key == 'esc':
+        elif key in ('esc', 'ctrl g'):
             u.emit_signal(self, 'escape', None)
         elif key == 'ctrl e':
             u.emit_signal(self, 'ctrl-e', None)

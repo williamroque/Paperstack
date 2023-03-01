@@ -340,8 +340,11 @@ class DetailView(u.WidgetWrap):
                 })
                 self.library.commit()
 
+                text = EntryElement.get_entry_text(field_name, name, text)
+                widget.inherent_text = text
+
                 widget.text.set_text(
-                    EntryElement.get_entry_text(field_name, name, text)
+                    [('entry_selected', '* ')] + text
                 )
 
                 self.messenger.send_success('Edited entry.')

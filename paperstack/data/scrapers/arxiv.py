@@ -127,6 +127,9 @@ class ArXivScraper(Scraper):
         if comment is not None:
             record['bibnote'] = comment
 
+        if 'path' in self.record:
+            record['path'] = self.record['path']
+
         self.record = record
 
 

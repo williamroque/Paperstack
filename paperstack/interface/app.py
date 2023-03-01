@@ -61,8 +61,9 @@ class App:
             ('record', '', ''),
             ('record_selected', 'dark green', ''),
             ('record_marked', 'dark blue', ''),
-            ('entry_selected', 'dark green', ''),
+            ('entry_selected', 'dark blue', ''),
             ('entry_name', 'dark blue', ''),
+            ('entry_empty', 'dark gray, italics', ''),
             ('footer', '', ''),
             ('tag', 'black', 'light blue')
         }
@@ -268,6 +269,7 @@ class App:
         self.detail_view.keymap.show_hints()
         self.list_view.has_focus = False
         self.detail_view.has_focus = True
+        self.detail_view.modified()
         self.columns.set_focus(1)
 
 
@@ -436,13 +438,33 @@ class App:
                 doc = fitz.open(absolute_path)
 
                 for page in doc:
-                    doi = re.search(
-                        r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/(?:(?!["&\'<>])\S)+)\b',
-                        page.get_text()
+                    text = page.get_text()
+
+                    arxiv = re.search(
+                        r'(?<=arxiv:)([0-9]+\.?[0-9]+)([vV0-9]*)',
+                        text,
+                        re.I
                     )
 
+                    doi = re.search(
+                        r'\b(10[.][0-9]{4,}(?:[.][0-9]+)*/(?:(?!["&\'<>])\S)+)\b',
+                        text
+                    )
+
+                    if arxiv:
+                        self.add_scraped(
+                            'arxiv',
+                            arxiv = arxiv.group(0),
+                            path = path
+                        )
+                        break
+
                     if doi:
-                        self.add_scraped('ads', doi = doi.group(0), path = path)
+                        self.add_scraped(
+                            'ads',
+                            doi = doi.group(0),
+                            path = path
+                        )
                         break
             else:
                 self.add_manual('article', path = path)
@@ -450,7 +472,7 @@ class App:
         def handle_file(option, path):
             if option == 'a':
                 self.messenger.ask_input(
-                    'Scrape using ADS? (y/...) ',
+                    'Scrape? (y/...) ',
                     '',
                     handle_add,
                     path

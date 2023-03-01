@@ -26,14 +26,14 @@ class EntryElement(u.WidgetWrap):
 
         self.keymap = keymap
 
-        self.text = u.Text(
-            EntryElement.get_entry_text(field_name, name, value)
+        self.inherent_text = EntryElement.get_entry_text(
+            field_name, name, value
         )
+        self.text = u.Text(self.inherent_text)
 
         self.text_wrapper = u.AttrWrap(
             self.text,
-            'entry',
-            'entry_selected'
+            'entry'
         )
 
         super().__init__(u.Padding(self.text_wrapper, 'center', ('relative', 90)))
@@ -58,7 +58,9 @@ class EntryElement(u.WidgetWrap):
             ('entry_name', f'{name}: ')
         ]
 
-        if field_name == 'tags':
+        if not value:
+            text.append(('entry_empty', '(Blank)'))
+        elif field_name == 'tags':
             tags = re.findall(
                 r';(.*?);',
                 clean_text(value)
@@ -119,6 +121,8 @@ class DetailView(u.WidgetWrap):
     keymap : paperstack.interface.keymap.Keymap
     has_focus : bool
     record : paperstack.data.record.Record
+    previous_widget : urwid.Widget
+        Keep track of last widget with focus.
     """
 
     def __init__(self, messenger, library, global_keymap, vim_keys):
@@ -127,6 +131,8 @@ class DetailView(u.WidgetWrap):
         self.keymap = Keymap(messenger, global_keymap)
 
         self.has_focus = False
+
+        self.previous_widget = None
 
         self.record = None
 
@@ -159,13 +165,30 @@ class DetailView(u.WidgetWrap):
         "When focus is modified, send signal."
 
         if self.has_focus:
+            if self.previous_widget is not None:
+                self.previous_widget.text.set_text(
+                    self.previous_widget.inherent_text
+                )
+
             widget, _ = self.walker.get_focus()
+
+            if isinstance(widget, EntryElement):
+                widget.text.set_text(
+                        [('entry_selected', '― ')] + widget.inherent_text
+                )
+
+                self.previous_widget = widget
 
             self.keymap.show_hints()
 
 
     def focus_list(self):
         "Move focus to list panel."
+
+        if self.previous_widget is not None:
+            self.previous_widget.text.set_text(
+                self.previous_widget.inherent_text
+            )
 
         u.emit_signal(self, 'focus_list')
 

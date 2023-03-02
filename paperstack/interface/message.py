@@ -248,9 +248,47 @@ class AppMessenger:
                 self.app.text_mode = True
 
 
-    def ask_input(self, prompt, default, callback, *callback_args):
+    def open_external_editor(self, default=''):
+        """Open external editor and get text.
 
-        """Ask for input using footer with `prompt` and with `default`
+        Parameters
+        ----------
+        default : str
+            Default text to set in the editor.
+        """
+
+        fd, filename = tempfile.mkstemp(
+            suffix=f'.{self.editor_extension}'
+        )
+
+        os.close(fd)
+
+        with open(filename, 'w') as f:
+            f.write(default)
+
+        self.app.loop.screen.stop()
+
+        try:
+            if '@FILE' in self.editor_command:
+                call(self.editor_command.replace('@FILE', f.name), shell=True)
+            else:
+                call([self.editor_command, f.name])
+
+        except Exception:
+            self.send_warning(f'Could not connect to editor using command `{self.editor_command}`.')
+
+        self.app.loop.screen.start()
+
+        with open(filename) as f:
+            text = f.read().strip()
+
+        os.remove(filename)
+
+        return text
+
+
+    def open_editor(self, prompt, default, callback, *callback_args):
+        """ Ask for input using footer with `prompt` and with `default`
         value, then call `callback` with results.
 
         Parameters
@@ -260,14 +298,6 @@ class AppMessenger:
         callback : func
         callback_args : list
         """
-
-        if self.input_active:
-            self.input_buffer.append(
-                (prompt, default, callback, *callback_args)
-            )
-            return
-
-        self.input_active = True
 
         if self.app is None:
             raise AppMessengerError
@@ -322,42 +352,49 @@ class AppMessenger:
         u.connect_signal(self.app, 'enter', enter)
 
         def switch_editor(_):
-            text = editor.get_edit_text()
+            default_text = editor.get_edit_text()
 
-            fd, filename = tempfile.mkstemp(
-                suffix=f'.{self.editor_extension}'
+            editor.set_edit_text(
+                self.open_external_editor(default_text)
             )
-
-            os.close(fd)
-
-            with open(filename, 'w') as f:
-                f.write(text)
-
-            self.app.loop.screen.stop()
-
-            try:
-                if '@FILE' in self.editor_command:
-                    call(self.editor_command.replace('@FILE', f.name), shell=True)
-                else:
-                    call([self.editor_command, f.name])
-
-            except Exception:
-                self.send_warning(f'Could not connect to editor using command `{self.editor_command}`.')
-
-            self.app.loop.screen.start()
-
-            with open(filename) as f:
-                editor.set_edit_text(
-                    f.read().strip()
-                )
-                editor.set_edit_pos(
-                    len(editor.get_edit_text())
-                )
-
-            os.remove(filename)
+            editor.set_edit_pos(
+                len(editor.get_edit_text())
+            )
 
         u.connect_signal(self.app, 'ctrl-e', switch_editor)
 
         self.app.footer_container.original_widget = editor
         self.app.text_mode = False
         self.app.focus_footer()
+
+
+    def ask_input(self, prompt, default, callback, *callback_args, editor_default=False):
+        """Ask for input using either internal or external editor.
+
+        Parameters
+        ----------
+        prompt : str
+        default : str
+        callback : func
+        callback_args : list
+        editor_default : bool
+            Whether switch to external editor directly.
+        """
+
+        if self.input_active:
+            self.input_buffer.append(
+                (prompt, default, callback, *callback_args)
+            )
+            return
+
+        self.input_active = True
+
+        if editor_default:
+            callback(self.open_external_editor(default), *callback_args)
+
+            self.input_active = False
+
+            if len(self.input_buffer) > 0:
+                self.ask_input(*self.input_buffer.pop(0))
+        else:
+            self.open_editor(prompt, default, callback, *callback_args)

@@ -146,6 +146,9 @@ class DetailView(u.WidgetWrap):
             self.keymap.bind('up', 'Previous', self.focus_previous)
 
         self.keymap.bind('e', 'Edit entry', self.edit_entry)
+        self.keymap.bind(
+            'E', 'Edit entry in editor', lambda: self.edit_entry(True)
+        )
         self.keymap.bind('c', 'Copy entry', self.copy_entry)
 
         self.keymap.bind('g', 'First', self.focus_first)
@@ -315,7 +318,7 @@ class DetailView(u.WidgetWrap):
         self.walker.set_focus(0)
 
 
-    def edit_entry(self):
+    def edit_entry(self, editor_default=False):
         "Edit currently selected entry."
 
         widget, index = self.walker.get_focus()
@@ -365,7 +368,8 @@ class DetailView(u.WidgetWrap):
         self.messenger.ask_input(
             f'{name}: ',
             value,
-            commit_edit
+            commit_edit,
+            editor_default = editor_default
         )
 
 

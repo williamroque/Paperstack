@@ -98,11 +98,11 @@ Find a presentation containing a few use cases and general information [here](ht
 
 Paperstack supports exporting to both BibTeX and a variety of citation standards. In order to maintain a small installation size, however, only the Harvard citation style is enabled by default. To add more, visit [CSL Styles | GitHub](https://github.com/citation-style-language/styles) and download the `.csl` file corresponding to your preferred style. Then, save that file to the `csl` directory within the data directory specified in your configuration.
 
-A few common styles include:
+A few common styles you can download include:
 
-* [APA 6 | GitHub](https://raw.githubusercontent.com/citation-style-language/styles/master/apa-6th-edition.csl)
-* [MLA | GitHub](https://raw.githubusercontent.com/citation-style-language/styles/master/modern-language-association.csl)
-* [Chicago | GitHub](https://raw.githubusercontent.com/citation-style-language/styles/master/chicago-author-date.csl)
+* <a href="https://raw.githubusercontent.com/citation-style-language/styles/master/apa-6th-edition.csl" download>APA 6 | GitHub</a>
+* <a href="https://raw.githubusercontent.com/citation-style-language/styles/master/modern-language-association.csl" download>MLA | GitHub</a>
+* <a href="https://raw.githubusercontent.com/citation-style-language/styles/master/chicago-author-date.csl" download>Chicago | GitHub</a>
 
 ## Contributing
 

@@ -3,13 +3,24 @@
 import re
 import os
 
+from copy import copy
+
+import io
+
 import bibtexparser
 from bibtexparser.bibdatabase import BibDatabase
 from bibtexparser.bwriter import BibTexWriter
 
-from paperstack.data.constants import COLUMNS
-from paperstack.filesystem.file import File
+from citeproc.source.bibtex import BibTeX
+from citeproc import CitationStylesStyle
+from citeproc import CitationStylesBibliography
+from citeproc import Citation
+from citeproc import CitationItem
+from citeproc import formatter
 
+from paperstack.data.constants import COLUMNS
+
+from paperstack.filesystem.file import File
 
 class Record:
     """Library record handling validation. This is the most basic data
@@ -37,6 +48,8 @@ class Record:
         The entries of the record.
     config : paperstack.filesystem.config.Config
     messenger : paperstack.interface.message.Messenger
+    csl_path : paperstack.filesystem.file.File
+        Path to CSL directory (where citation styles are stored).
     """
 
     RECORD_TYPE = None
@@ -46,6 +59,13 @@ class Record:
         self.record = record
         self.config = config
         self.messenger = messenger
+
+        self.csl_path = File(
+            self.config.get('paths', 'data'),
+            True
+        )
+        self.csl_path.path = self.csl_path.join('csl')
+        self.csl_path.ensure()
 
         if not delay_setup:
             self.sanitize()
@@ -247,6 +267,19 @@ class Record:
             self.record['record_id'] = self.generate_id()
 
 
+    def get_csl(self):
+        "Get CSL options and paths."
+
+        csl_options = {
+            os.path.splitext(path)[0]: os.path.join(
+                self.csl_path.path, path
+            ) for path in os.listdir(self.csl_path.path)
+        }
+        csl_options['harvard'] = 'harvard1'
+
+        return csl_options
+
+
     def to_sql(self):
         "Export to SQL (SQL insert command)."
 
@@ -265,8 +298,27 @@ class Record:
         return f'INSERT INTO library ({fields}) VALUES ({values})'
 
 
-    def to_bibtex(self):
-        "Export to BibTeX."
+    def to_bibtex(self, record=None):
+        """Export to BibTeX.
+
+        Parameters
+        ----------
+        record : dict
+            Use specified record instead.
+        """
+
+        raise NotImplementedError
+
+
+    def to_citation(self, citation_type, record=None):
+        """Export to citation.
+
+        Parameters
+        ----------
+        citation_type : str
+        record : dict
+            Use specified record instead.
+        """
 
         raise NotImplementedError
 
@@ -318,7 +370,10 @@ class Article(Record):
     ]
 
 
-    def to_bibtex(self):
+    def to_bibtex(self, record=None):
+        if record is None:
+            record = self.record
+
         database = BibDatabase()
 
         entries = [
@@ -341,8 +396,8 @@ class Article(Record):
         }
 
         for record_key, bibtex_key in entries:
-            if record_key in self.record and self.record[record_key]:
-                bibtex_entries[bibtex_key] = str(self.record[record_key])
+            if record_key in record and record[record_key]:
+                bibtex_entries[bibtex_key] = str(record[record_key])
 
         database.entries = [bibtex_entries]
 
@@ -350,6 +405,35 @@ class Article(Record):
         writer.indent = '    '
 
         return bibtexparser.dumps(database, writer)
+
+
+    def to_citation(self, citation_type, record=None):
+        if record is None:
+            record = self.record
+
+        record = copy(record)
+
+        if 'abstract' in record:
+            del record['abstract']
+
+        if 'bibnote' in record:
+            del record['bibnote']
+
+        source = BibTeX(io.StringIO(self.to_bibtex(record)))
+
+        style = CitationStylesStyle(
+            citation_type,
+            validate = False
+        )
+        bibliography = CitationStylesBibliography(
+            style,
+            source,
+            formatter.plain
+        )
+        citation = Citation([CitationItem(record['record_id'])])
+        bibliography.register(citation)
+
+        return str(bibliography.bibliography()[0])
 
 
 record_constructors = {

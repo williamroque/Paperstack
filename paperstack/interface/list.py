@@ -5,6 +5,8 @@ import os
 
 import urwid as u
 
+import pyperclip
+
 from paperstack.interface.keymap import Keymap
 from paperstack.interface.util import clean_text
 from paperstack.data.scrapers import scraper_constructors
@@ -113,6 +115,11 @@ class ListView(u.WidgetWrap):
             ['e', 'b'],
             ['Export', 'BibTeX'],
             self.export_bibtex
+        )
+        self.keymap.bind_combo(
+            ['e', 'c'],
+            ['Export', 'Citation'],
+            self.export_citation
         )
         self.keymap.bind_combo(
             ['p', 'a'],
@@ -333,6 +340,49 @@ class ListView(u.WidgetWrap):
             'Export path: ',
             'refs.bib',
             write_bibtex
+        )
+
+
+    def export_citation(self):
+        "Export current record to citation and write to specified path."
+
+        marks = self.get_marks()
+
+        def copy_citation(citation_type):
+            citation_type = citation_type.strip()
+
+            if not citation_type or citation_type == 'harvard':
+                citation_type = 'harvard1'
+            else:
+                citation_types = list(marks)[0].content.get_csl()
+
+                if citation_type in citation_types:
+                    citation_type = citation_types[citation_type]
+                else:
+                    try:
+                        self.messenger.send_error(
+                            f'Citation style "{citation_type}" not available.'
+                        )
+                    except AppMessengerError:
+                        pass
+
+                    return
+
+            text = []
+
+            for widget in marks:
+                text.append(
+                    widget.content.to_citation(citation_type)
+                )
+
+            pyperclip.copy('\n'.join(text))
+
+            self.messenger.send_success('Copied citation to clipboard.')
+
+        self.messenger.ask_input(
+            'Citation type: ',
+            '',
+            copy_citation
         )
 
 

@@ -205,15 +205,23 @@ def export_record(args):
         record_id = record_id.strip()
         record = library.get(record_id)
 
-        options = {'bibtex': record.to_bibtex}
+        citation_types = record.get_csl()
+
+        options = {
+            'bibtex': (record.to_bibtex, None)
+        }
+
+        for citation_type, path in citation_types.items():
+            options[citation_type] = (record.to_citation, path)
+
         option_names = ', '.join(options.keys())
 
         if not args.option in options:
             messenger.send_error(f'Export option needs to be one of: {option_names}.')
 
-        option = options[args.option]
+        option, argument = options[args.option]
 
-        messenger.send_neutral(option())
+        messenger.send_neutral(option(argument))
 
 
 def main():

@@ -9,7 +9,7 @@ def readme():
 
 setup(
     name='paperstack',
-    version='1.1.9',
+    version='1.2.0',
     description='A powerful, lightweight, universal bibliography management tool',
     long_description=readme(),
     long_description_content_type='text/markdown',
@@ -37,7 +37,8 @@ setup(
         'urwid',
         'pyperclip',
         'pymupdf',
-        'beautifulsoup4'
+        'beautifulsoup4',
+        'citeproc-py'
     ],
     scripts = ['bin/paperstack'],
 )

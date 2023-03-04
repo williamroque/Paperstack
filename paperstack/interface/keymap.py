@@ -117,7 +117,7 @@ class Keymap:
             if isinstance(binding, dict):
                 hint = binding['hint']
             else:
-                if not binding[2]:
+                if len(binding) == 3 and not binding[2]:
                     continue
 
                 hint = binding[0]

@@ -137,9 +137,9 @@ class DetailView(u.WidgetWrap):
         self.record = None
 
         if vim_keys:
-            self.keymap.bind('h', 'Focus list', self.focus_list)
-            self.keymap.bind('j', 'Next', self.focus_next)
-            self.keymap.bind('k', 'Previous', self.focus_previous)
+            self.keymap.bind(('h', 'left'), 'Focus list', self.focus_list)
+            self.keymap.bind(('j', 'down'), 'Next', self.focus_next)
+            self.keymap.bind(('k', 'up'), 'Previous', self.focus_previous)
         else:
             self.keymap.bind('left', 'Focus list', self.focus_list)
             self.keymap.bind('down', 'Next', self.focus_next)

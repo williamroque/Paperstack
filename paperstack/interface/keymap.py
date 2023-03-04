@@ -48,7 +48,11 @@ class Keymap:
 
         """
 
-        self.keymap[key] = (hint, callback)
+        if isinstance(key, (tuple, list)):
+            for i, binding in enumerate(key):
+                self.keymap[binding] = (hint, callback, i == 0)
+        else:
+            self.keymap[key] = (hint, callback, True)
 
 
     def bind_combo(self, keys, hints, callback):
@@ -113,6 +117,9 @@ class Keymap:
             if isinstance(binding, dict):
                 hint = binding['hint']
             else:
+                if not binding[2]:
+                    continue
+
                 hint = binding[0]
 
             hints.append(f'{key}: {hint}')

@@ -97,9 +97,9 @@ class ListView(u.WidgetWrap):
         self.marks = set()
 
         if vim_keys:
-            self.keymap.bind('l', 'Focus details', self.focus_details)
-            self.keymap.bind('j', 'Next', self.focus_next)
-            self.keymap.bind('k', 'Previous', self.focus_previous)
+            self.keymap.bind(('l', 'right'), 'Focus details', self.focus_details)
+            self.keymap.bind(('j', 'down'), 'Next', self.focus_next)
+            self.keymap.bind(('k', 'up'), 'Previous', self.focus_previous)
         else:
             self.keymap.bind('right', 'Focus details', self.focus_details)
             self.keymap.bind('down', 'Next', self.focus_next)

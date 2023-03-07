@@ -3,9 +3,9 @@
 from copy import copy
 import re
 
-import fitz
-
 import os
+
+import fitz
 
 import urwid as u
 
@@ -18,6 +18,7 @@ from paperstack.data.scrapers import scraper_constructors
 
 from paperstack.interface.list import ListView
 from paperstack.interface.details import DetailView
+from paperstack.interface.table import TableView
 
 from paperstack.utility import parse_dict
 
@@ -30,6 +31,8 @@ class App:
         self.messenger = messenger
         self.library = library
         self.keymap = Keymap(self.messenger)
+
+        self.use_table = False
 
         self.keymap.bind('q', 'Exit app', self.quit)
 
@@ -55,12 +58,14 @@ class App:
         )
 
         self.keymap.bind('f', 'Filter', self.filter_records)
+        self.keymap.bind('t', 'Table view', self.toggle_table_view)
 
         self.palette = {
             ('bg', '', ''),
             ('record', '', ''),
             ('record_selected', 'dark green', ''),
             ('record_marked', 'dark blue', ''),
+            ('header', 'underline', ''),
             ('entry_selected', 'dark blue', ''),
             ('entry_name', 'dark blue', ''),
             ('entry_empty', 'dark gray, italics', ''),
@@ -71,7 +76,7 @@ class App:
         screen = u.raw_display.Screen()
 
         screen.tty_signal_keys(
-            'undefined','undefined', 'undefined','undefined','undefined'
+            'undefined', 'undefined', 'undefined', 'undefined', 'undefined'
         )
 
         size = screen.get_cols_rows()
@@ -151,6 +156,14 @@ class App:
                 ('weight', detail_ratio, detail_panel)
             ])
 
+        self.table_view = TableView(
+            self.config,
+            self.messenger,
+            self.library,
+            self.keymap,
+            vim_keys
+        )
+
         self.frame = u.Frame(
             body = self.columns,
             footer = self.footer_container
@@ -164,6 +177,21 @@ class App:
         )
 
         self.focus_list()
+
+
+    def toggle_table_view(self):
+        "Switch interface to and from table view."
+
+        if self.use_table:
+            self.frame.body = self.columns
+        else:
+            self.frame.body = self.table_view
+
+        self.use_table = not self.use_table
+
+        self.update_data(
+            self.library.filter([])
+        )
 
 
     def change_colors(self, entry, foreground, background):
@@ -199,12 +227,17 @@ class App:
     def filter_records(self):
         "Filter and display records."
 
-        for widget in self.list_view.walker:
-            if widget in self.list_view.marks:
-                self.list_view.marks.remove(widget)
+        if self.use_table:
+            view = self.table_view
+        else:
+            view = self.list_view
+
+        for widget in view.walker:
+            if widget in view.marks:
+                view.marks.remove(widget)
                 widget.text_wrapper.set_attr('record')
 
-        self.list_view.marks.clear()
+        view.marks.clear()
 
         def display(text):
             filters = list(parse_dict(text, 'title').items())
@@ -414,7 +447,10 @@ class App:
         records : list
         """
 
-        self.list_view.set_data(records)
+        if self.use_table:
+            self.table_view.set_data(records)
+        else:
+            self.list_view.set_data(records)
 
 
     def start(self):

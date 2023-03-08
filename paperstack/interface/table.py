@@ -62,12 +62,12 @@ class HeaderElement(u.WidgetWrap):
             row.append(('weight', column_ratio, text))
 
         row = u.Columns(row)
-        wrapper = u.AttrWrap(
+        self.wrapper = u.AttrWrap(
             row,
             'header'
         )
 
-        super().__init__(u.Padding(wrapper, 'center', ('relative', 90)))
+        super().__init__(u.Padding(self.wrapper, 'center', ('relative', 90)))
 
 
     def keypress(self, size, key):
@@ -124,7 +124,7 @@ class RowElement(u.WidgetWrap):
             row.append(('weight', column_ratio, text))
 
         row = u.Columns(row)
-        wrapper = u.AttrWrap(
+        self.wrapper = u.AttrWrap(
             row,
             'record',
             'record_selected'
@@ -132,7 +132,7 @@ class RowElement(u.WidgetWrap):
 
         self.keymap = keymap
 
-        super().__init__(u.Padding(wrapper, 'center', ('relative', 90)))
+        super().__init__(u.Padding(self.wrapper, 'center', ('relative', 90)))
 
 
     def keypress(self, size, key):
@@ -350,10 +350,10 @@ class TableView(u.WidgetWrap):
 
         if widget in self.marks:
             self.marks.remove(widget)
-            widget.text_wrapper.set_attr('record')
+            widget.wrapper.set_attr('record')
         else:
             self.marks.add(widget)
-            widget.text_wrapper.set_attr('record_marked')
+            widget.wrapper.set_attr('record_marked')
 
         self.focus_next()
 
@@ -361,13 +361,13 @@ class TableView(u.WidgetWrap):
     def mark_all(self):
         "Toggle marks for all records."
 
-        for widget in self.walker:
+        for widget in self.walker[1:]:
             if widget in self.marks:
                 self.marks.remove(widget)
-                widget.text_wrapper.set_attr('record')
+                widget.wrapper.set_attr('record')
             else:
                 self.marks.add(widget)
-                widget.text_wrapper.set_attr('record_marked')
+                widget.wrapper.set_attr('record_marked')
 
 
     def export_bibtex(self):

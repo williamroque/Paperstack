@@ -326,7 +326,10 @@ class DetailView(u.WidgetWrap):
         field_name, name = widget.content
 
         def commit_edit(text):
-            old_entry = self.record.record[field_name]
+            if field_name in self.record.record and self.record.record[field_name]:
+                old_entry = self.record.record[field_name]
+            else:
+                old_entry = ''
 
             if text.strip() == old_entry.strip():
                 self.messenger.send_neutral('(No changes need to be saved)')

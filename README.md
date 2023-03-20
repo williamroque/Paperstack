@@ -87,7 +87,8 @@ timeout = 10
 vim-bindings = yes
 
 [editor]
-command = nvim
+command = vim
+extension = md
 ```
 
 Note that to scrape ADS, a valid API key has to be specified in the config file.
